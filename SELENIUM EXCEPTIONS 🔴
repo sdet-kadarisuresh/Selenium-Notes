@@ -1,0 +1,501 @@
+SELENIUM EXCEPTIONS 🔴
+NoSuchElementException?
+StaleElementReferenceException?
+TimeoutException?
+ElementNotInteractableException?
+ElementClickInterceptedException?
+InvalidSelectorException?
+NoSuchFrameException?
+NoAlertPresentException?
+WebDriverException?
+SessionNotCreatedException?
+How do you debug Selenium failures?
+
+SELENIUM EXCEPTIONS 🔴
+258. What is NoSuchElementException?
+Interview Answer
+
+NoSuchElementException occurs when Selenium cannot find the element in the DOM using the locator provided.
+
+Common reasons
+Wrong XPath/CSS/ID
+Element is not loaded yet
+Wrong page
+Element is inside an iframe
+Element is inside a different window/tab
+Locator is dynamic and has changed
+Example
+driver.findElement(By.id("loginButton")).click();
+
+If loginButton doesn't exist, Selenium throws:
+
+NoSuchElementException
+How do you fix it?
+Verify locator
+Check whether you are on the correct page
+Use explicit wait if element loads dynamically
+Switch to iframe if required
+Switch to correct window/tab if required
+WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(10));
+
+WebElement login = wait.until(
+    ExpectedConditions.visibilityOfElementLocated(By.id("loginButton"))
+);
+
+login.click();
+⭐ Interview trap
+
+Don't say: "Element is not clickable."
+
+That's usually related to ElementNotInteractableException or ElementClickInterceptedException.
+
+259. What is StaleElementReferenceException?
+Interview Answer
+
+A StaleElementReferenceException occurs when Selenium has a reference to an element, but that element is no longer attached to the current DOM.
+
+In simple words:
+
+You found the element → page/DOM changed → old WebElement reference became invalid.
+
+Example
+WebElement username = driver.findElement(By.id("username"));
+
+driver.navigate().refresh();
+
+username.sendKeys("admin");
+
+The old username reference may now be stale.
+
+Common causes
+Page refresh
+DOM refresh
+AJAX update
+React/Angular component re-render
+Element removed and recreated
+How do you handle it?
+
+Instead of keeping an old reference, locate the element again.
+
+driver.navigate().refresh();
+
+WebElement username =
+    driver.findElement(By.id("username"));
+
+username.sendKeys("admin");
+
+Or use an explicit wait.
+
+WebDriverWait wait =
+    new WebDriverWait(driver, Duration.ofSeconds(10));
+
+WebElement username = wait.until(
+    ExpectedConditions.visibilityOfElementLocated(
+        By.id("username")
+    )
+);
+
+username.sendKeys("admin");
+⭐ Strong 5-year answer
+
+"I don't blindly retry stale-element failures. First I check why the DOM is getting refreshed or re-rendered. If the element is legitimately recreated, I re-locate it using a stable locator and appropriate explicit wait."
+
+260. What is TimeoutException?
+Interview Answer
+
+TimeoutException occurs when an expected condition is not satisfied within the specified waiting time.
+
+Example:
+
+WebDriverWait wait =
+    new WebDriverWait(driver, Duration.ofSeconds(10));
+
+wait.until(
+    ExpectedConditions.visibilityOfElementLocated(
+        By.id("dashboard")
+    )
+);
+
+If dashboard doesn't become visible within 10 seconds:
+
+TimeoutException
+Common reasons
+Application is slow
+Wrong locator
+Element never appears
+API/backend failure
+Page didn't load correctly
+Incorrect expected condition
+Environment issue
+How do you debug?
+
+Check:
+
+1. Locator
+2. Current URL
+3. Page source/DOM
+4. Application response
+5. Logs
+6. Screenshot
+7. Network/API behavior
+8. Whether the expected condition is correct
+⭐ Important
+
+Don't solve every TimeoutException by increasing:
+
+Duration.ofSeconds(60)
+
+That can hide real application problems.
+
+261. What is ElementNotInteractableException?
+Interview Answer
+
+It occurs when Selenium finds the element, but the element cannot currently be interacted with.
+
+For example, the element may be:
+
+Hidden
+Disabled
+Not displayed
+Outside the required interaction state
+Example
+driver.findElement(By.id("submit")).click();
+
+But the button is disabled/hidden.
+
+How do you handle it?
+
+First determine why it isn't interactable.
+
+WebDriverWait wait =
+    new WebDriverWait(driver, Duration.ofSeconds(10));
+
+WebElement submit = wait.until(
+    ExpectedConditions.elementToBeClickable(
+        By.id("submit")
+    )
+);
+
+submit.click();
+⭐ Difference
+Exception	Meaning
+NoSuchElementException	Element not found
+ElementNotInteractableException	Element found but can't interact
+ElementClickInterceptedException	Click is blocked by another element
+262. What is ElementClickInterceptedException?
+Interview Answer
+
+It occurs when Selenium tries to click an element, but another element is covering or intercepting the click.
+
+Real-world example
+
+You want to click:
+
+Login Button
+
+But a:
+
+Cookie popup
+
+is covering it.
+
+Selenium finds Login but the click goes to the popup.
+
+Common reasons
+Popup
+Cookie banner
+Overlay
+Loading spinner
+Sticky header
+Modal
+Another element overlapping the target
+How do you handle it?
+
+First handle the blocking element.
+
+WebDriverWait wait =
+    new WebDriverWait(driver, Duration.ofSeconds(10));
+
+WebElement cookie =
+    wait.until(ExpectedConditions.visibilityOfElementLocated(
+        By.id("cookiePopup")
+    ));
+
+driver.findElement(By.id("acceptCookie")).click();
+
+wait.until(ExpectedConditions.elementToBeClickable(
+    By.id("login")
+)).click();
+⭐ Interview point
+
+Don't immediately use JavaScript:
+
+JavascriptExecutor
+
+First understand why the click is intercepted.
+
+263. What is InvalidSelectorException?
+Interview Answer
+
+InvalidSelectorException occurs when the XPath or CSS selector provided is syntactically invalid or not supported.
+
+Wrong XPath
+driver.findElement(
+    By.xpath("//input[@id='username'")
+);
+
+Missing:
+
+]
+
+Correct:
+
+driver.findElement(
+    By.xpath("//input[@id='username']")
+);
+Common reasons
+Invalid XPath syntax
+Invalid CSS syntax
+Wrong quotes
+Missing brackets
+Unsupported XPath expression
+How do you debug?
+
+Test the locator in:
+
+Chrome DevTools → Console
+
+For XPath:
+
+$x("//input[@id='username']")
+
+For CSS:
+
+document.querySelector("#username")
+264. What is NoSuchFrameException?
+Interview Answer
+
+NoSuchFrameException occurs when Selenium tries to switch to a frame/iframe that cannot be found.
+
+Example:
+
+driver.switchTo().frame("paymentFrame");
+
+If that frame doesn't exist, Selenium throws:
+
+NoSuchFrameException
+Common reasons
+Wrong frame name/id
+Frame doesn't exist
+Frame is dynamically loaded
+Frame is nested
+Trying to switch before iframe is available
+Better approach
+WebDriverWait wait =
+    new WebDriverWait(driver, Duration.ofSeconds(10));
+
+wait.until(
+    ExpectedConditions.frameToBeAvailableAndSwitchToIt(
+        By.id("paymentFrame")
+    )
+);
+
+After finishing:
+
+driver.switchTo().defaultContent();
+⭐ Interview question
+
+How do you handle nested frames?
+
+driver.switchTo().frame("outerFrame");
+driver.switchTo().frame("innerFrame");
+
+// perform operations
+
+driver.switchTo().defaultContent();
+265. What is NoAlertPresentException?
+Interview Answer
+
+NoAlertPresentException occurs when Selenium tries to switch to an alert, but no alert is currently present.
+
+Example:
+
+driver.switchTo().alert();
+
+If there is no alert:
+
+NoAlertPresentException
+Better handling
+WebDriverWait wait =
+    new WebDriverWait(driver, Duration.ofSeconds(10));
+
+Alert alert = wait.until(
+    ExpectedConditions.alertIsPresent()
+);
+
+alert.accept();
+Alert types
+1. Simple alert
+2. Confirmation alert
+3. Prompt alert
+
+Example:
+
+Alert alert = driver.switchTo().alert();
+
+String message = alert.getText();
+
+alert.accept();
+266. What is WebDriverException?
+Interview Answer
+
+WebDriverException is a broader Selenium exception that indicates a WebDriver-related failure.
+
+It is a superclass for many WebDriver-specific exceptions.
+
+Possible causes
+Driver problem
+Browser communication failure
+Browser crash
+Session issue
+Invalid WebDriver operation
+Environment problem
+
+Example:
+
+ChromeDriver cannot communicate with Chrome
+
+may result in a WebDriver-related exception.
+
+⭐ Interview point
+
+Don't simply catch:
+
+catch (WebDriverException e)
+
+and ignore it.
+
+You need to identify the actual root cause.
+
+267. What is SessionNotCreatedException?
+Interview Answer
+
+SessionNotCreatedException occurs when Selenium cannot create a WebDriver session with the browser.
+
+Very common reasons
+Chrome ↔ ChromeDriver incompatibility
+Browser installation problem
+Incorrect driver configuration
+Unsupported browser version
+Invalid browser capabilities
+Example
+
+Suppose:
+
+Chrome = Version 153
+ChromeDriver = incompatible version
+
+Selenium may fail while creating the session.
+
+How do you debug?
+
+Check:
+
+1. Browser version
+2. Selenium version
+3. Driver/browser compatibility
+4. Driver logs
+5. Browser installation
+6. CI/CD environment
+7. WebDriver configuration
+⭐ Modern Selenium point
+
+With modern Selenium, Selenium Manager can automatically manage browser drivers in many setups, so manually downloading a matching ChromeDriver is often unnecessary.
+
+268. How do you debug Selenium failures?
+
+🔥 This is a VERY important SDET interview question.
+
+Don't answer:
+
+"I run the test again."
+
+Give a structured debugging process.
+
+⭐ Best Interview Answer
+
+"When a Selenium test fails, I first identify the exact failure point from the test report and stack trace. Then I check the screenshot, logs, current URL and DOM state. I verify whether the locator is correct and whether the element is inside an iframe, window or shadow DOM. If it's a synchronization issue, I check the wait condition and application behavior. I also verify whether the failure is reproducible and whether it's related to the application, automation code, test data, environment or infrastructure. Finally, I reproduce the issue locally if required and fix the root cause rather than simply adding retries."
+
+🔥 My Selenium Failure Debugging Flow
+
+Remember this sequence:
+
+TEST FAILED
+     ↓
+Check Test Report
+     ↓
+Check Exception + Stack Trace
+     ↓
+Identify Exact Failed Step
+     ↓
+Check Screenshot
+     ↓
+Check Logs
+     ↓
+Check Current URL
+     ↓
+Check DOM
+     ↓
+Check Locator
+     ↓
+Check Wait/Synchronization
+     ↓
+Check iframe / Window / Shadow DOM
+     ↓
+Check Test Data
+     ↓
+Check API / Backend
+     ↓
+Check Environment
+     ↓
+Identify Root Cause
+     ↓
+Fix + Re-run
+Example interview scenario
+
+Interviewer:
+
+"Your Selenium script was working yesterday but failed today. What will you do?"
+
+⭐ 5-year-level answer
+
+"First, I won't immediately assume it's an automation defect. I'll check the failed test's report, exception, stack trace, screenshot and logs to identify the exact step. Then I'll verify whether the UI or locator has changed, whether the element is loading differently, and whether there are synchronization issues. I'll also check test data, application availability, API/backend failures and environment changes. If the failure is reproducible locally, I'll debug the automation code. If other tests are also failing at the same point, I'll investigate whether it's an application or environment issue. Once I identify the root cause, I'll fix it and rerun the impacted tests."
+
+🔥 Golden rule
+
+For Selenium exceptions, remember:
+
+Find → Wait → Interact → Context → Environment
+
+Can't find?
+→ Locator / DOM / iframe
+
+Found but can't interact?
+→ Visibility / enabled state
+
+Click blocked?
+→ Overlay / popup / spinner
+
+Element became invalid?
+→ DOM refresh / stale element
+
+Waiting too long?
+→ Synchronization / application / locator
+
+Can't switch?
+→ iframe / alert / window
+
+Can't start browser?
+→ Driver / browser / environment
+
+This is the level of explanation you should aim for in an SDET second round/client round, rather than giving only one-line definitions.
