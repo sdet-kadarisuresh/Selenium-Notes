@@ -1,0 +1,979 @@
+312. What is a Dynamic Element?
+
+A dynamic element is an element whose properties such as id, class, text, or position can change dynamically based on the application state, refresh, session, or data.
+
+Example
+<input id="user_12345" type="text">
+
+After refresh:
+
+<input id="user_67890" type="text">
+
+The ID changes, so I would avoid using the complete dynamic ID.
+
+Interview answer
+
+“A dynamic element is an element whose attributes or location can change during runtime. I handle it by identifying stable attributes and using relative XPath or CSS selectors, and I also use explicit waits when the element appears asynchronously.”
+
+313. What is a Dynamic ID?
+
+A dynamic ID is an ID whose value changes between executions.
+
+Example:
+
+user_12345
+user_56789
+user_98765
+
+Instead of:
+
+driver.findElement(By.id("user_12345"));
+
+I can use:
+
+driver.findElement(
+    By.xpath("//input[starts-with(@id,'user_')]")
+);
+
+Or:
+
+driver.findElement(
+    By.xpath("//input[contains(@id,'user_')]")
+);
+Better approach
+
+If another attribute is stable:
+
+By username = By.cssSelector("input[name='username']");
+Interview answer
+
+“I don't depend on the complete dynamic ID. I identify stable attributes and use contains() or starts-with() in XPath if required. My preference is always to use the most stable and unique locator available.”
+
+314. Element Appears After AJAX
+
+AJAX means the page does not necessarily refresh. A particular element or data may be loaded asynchronously.
+
+For example:
+
+Click Search
+     ↓
+AJAX request
+     ↓
+Server response
+     ↓
+Results appear
+
+I would use an explicit wait.
+
+WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(10));
+
+WebElement result = wait.until(
+    ExpectedConditions.visibilityOfElementLocated(
+        By.id("searchResult")
+    )
+);
+
+result.click();
+
+For a clickable element:
+
+wait.until(
+    ExpectedConditions.elementToBeClickable(
+        By.id("submit")
+    )
+).click();
+Interview answer
+
+“For AJAX-based elements, I don't use Thread.sleep. I use explicit waits based on the expected condition, such as visibility, presence, or clickability.”
+
+315. Element Inside iframe
+
+First identify the iframe and switch into it.
+
+driver.switchTo().frame("paymentFrame");
+
+Then interact with the element:
+
+driver.findElement(By.id("cardNumber")).sendKeys("1234");
+
+After completing the operation:
+
+driver.switchTo().defaultContent();
+If iframe doesn't have ID/name
+
+Use WebElement:
+
+WebElement frame = driver.findElement(
+    By.cssSelector("iframe.payment-frame")
+);
+
+driver.switchTo().frame(frame);
+Multiple nested frames
+driver.switchTo().frame("parentFrame");
+driver.switchTo().frame("childFrame");
+
+Return one level:
+
+driver.switchTo().parentFrame();
+Interview answer
+
+“Selenium cannot directly interact with elements inside an iframe from the parent document. I first switch to the iframe, perform the operation, and then switch back using defaultContent().”
+
+316. Element Hidden
+
+A hidden element exists in the DOM but is not visible to the user.
+
+Example:
+
+<input type="text" style="display:none">
+
+I don't normally try to interact with it directly.
+
+First I check:
+
+WebElement element = driver.findElement(By.id("username"));
+
+System.out.println(element.isDisplayed());
+
+If it is hidden, I determine why it is hidden.
+
+Sometimes clicking another element makes it visible:
+
+driver.findElement(By.id("showButton")).click();
+
+wait.until(
+    ExpectedConditions.visibilityOfElementLocated(
+        By.id("username")
+    )
+).sendKeys("admin");
+Interview answer
+
+“If an element is hidden, I don't force the interaction immediately. I first understand the application behavior and identify what action makes the element visible. Then I wait for visibility and interact with it.”
+
+317. Element Disabled
+
+Check whether it is enabled:
+
+WebElement button = driver.findElement(By.id("submit"));
+
+if (button.isEnabled()) {
+    button.click();
+}
+
+If disabled:
+
+System.out.println("Button is disabled");
+Important interview point
+
+Don't use JavaScript to click a disabled button just to make the test pass.
+
+The application intentionally disabled it.
+
+Interview answer
+
+“If the element is disabled, I first verify whether the application is supposed to enable it after some prerequisite action. I perform the required action and wait for it to become enabled. I don't bypass application behavior using JavaScript unless there is a specific technical reason.”
+
+318. Element Covered by Another Element
+
+Example:
+
+Button
+  ↓
+Overlay / Popup
+  ↓
+Button cannot be clicked
+
+Selenium may throw:
+
+ElementClickInterceptedException
+
+I investigate the overlay first.
+
+WebDriverWait wait =
+    new WebDriverWait(driver, Duration.ofSeconds(10));
+
+wait.until(
+    ExpectedConditions.invisibilityOfElementLocated(
+        By.id("loadingOverlay")
+    )
+);
+
+driver.findElement(By.id("submit")).click();
+
+Or wait for the element to become clickable:
+
+wait.until(
+    ExpectedConditions.elementToBeClickable(
+        By.id("submit")
+    )
+).click();
+Interview answer
+
+“If another element is covering my target, I identify the overlay, popup, loader, or animation causing the interception. I wait until it disappears and then click the target.”
+
+319. Element Changes After Every Refresh
+
+Suppose:
+
+Before refresh → ID = user123
+After refresh  → ID = user987
+
+Don't store the dynamic ID.
+
+Use stable attributes:
+
+By user = By.xpath("//input[contains(@name,'username')]");
+
+Or use other stable properties:
+
+By user = By.cssSelector("input[type='text'][name='username']");
+Interview answer
+
+“If the element changes after every refresh, I avoid identifying it using runtime-generated attributes. I inspect the DOM and identify stable attributes or a stable relationship with another element.”
+
+320. Stale Element After Page Refresh
+
+Example:
+
+WebElement username =
+    driver.findElement(By.id("username"));
+
+driver.navigate().refresh();
+
+username.sendKeys("admin");
+
+This can produce:
+
+StaleElementReferenceException
+
+Why?
+
+Because the old DOM element is no longer attached to the current DOM.
+
+Correct approach
+
+Find it again:
+
+driver.navigate().refresh();
+
+WebElement username =
+    driver.findElement(By.id("username"));
+
+username.sendKeys("admin");
+With explicit wait
+WebDriverWait wait =
+    new WebDriverWait(driver, Duration.ofSeconds(10));
+
+driver.navigate().refresh();
+
+WebElement username = wait.until(
+    ExpectedConditions.visibilityOfElementLocated(
+        By.id("username")
+    )
+);
+
+username.sendKeys("admin");
+Interview answer
+
+“After refresh, the DOM is recreated, so previously stored WebElement references may become stale. I locate the element again after the refresh rather than reusing the old WebElement.”
+
+321. Multiple Elements Have Same Locator
+
+Suppose:
+
+driver.findElements(By.className("delete"));
+
+returns 5 elements.
+
+findElement() returns the first matching element.
+
+For multiple elements:
+
+List<WebElement> buttons =
+    driver.findElements(By.className("delete"));
+
+Then:
+
+System.out.println(buttons.size());
+
+Or select based on index:
+
+buttons.get(2).click();
+
+But index should not be your first choice.
+
+Better
+
+Use a unique relationship.
+
+driver.findElement(
+    By.xpath("//tr[td[text()='John']]//button[text()='Delete']")
+).click();
+Interview answer
+
+“If multiple elements have the same locator, I first try to make the locator unique using parent-child relationships, text, attributes, or row-specific conditions. If the elements are genuinely identical, I use findElements() and select based on the required business condition.”
+
+322. Calendar Automation
+
+Calendar automation is a very common interview question.
+
+There are generally two types:
+
+Type 1 — HTML date input
+
+If it is:
+
+<input type="date">
+
+Sometimes:
+
+driver.findElement(By.id("date"))
+       .sendKeys("09/15/2026");
+
+But implementation depends on browser/application.
+
+Type 2 — Custom calendar
+
+Example:
+
+September 2026
+
+<     September 2026     >
+
+Sun Mon Tue Wed Thu Fri Sat
+        1   2   3   4   5
+6   7   8   9  10  11  12
+
+You need to:
+
+Open calendar.
+Read displayed month/year.
+Compare with required month/year.
+Navigate next/previous.
+Select day.
+Interview answer
+
+“For calendar automation, I first identify whether it is a native date input or a custom calendar widget. For a custom calendar, I read the currently displayed month and year, navigate until I reach the required month and year, and then select the required day using a stable locator.”
+
+323. Dynamic Calendar
+
+Suppose interviewer asks:
+
+Select 25 December 2026.
+
+A generic approach:
+
+String targetMonth = "December";
+String targetYear = "2026";
+String targetDay = "25";
+
+Open calendar:
+
+driver.findElement(By.id("calendar")).click();
+
+Read month/year:
+
+while (true) {
+
+    String displayedMonth =
+        driver.findElement(By.cssSelector(".calendar-month"))
+              .getText();
+
+    String displayedYear =
+        driver.findElement(By.cssSelector(".calendar-year"))
+              .getText();
+
+    if (displayedMonth.equals(targetMonth)
+            && displayedYear.equals(targetYear)) {
+        break;
+    }
+
+    driver.findElement(By.cssSelector(".next-month")).click();
+}
+
+Then select the day:
+
+driver.findElement(
+    By.xpath("//button[normalize-space()='25']")
+).click();
+Real-world improvement
+
+Don't blindly use:
+
+//button[text()='25']
+
+because there could be multiple 25s from previous/next month days.
+
+Use the calendar container:
+
+By.xpath(
+    "//div[@class='calendar']//button[normalize-space()='25']"
+);
+Strong interview answer
+
+“For a dynamic calendar, I don't hard-code the number of clicks. I compare the displayed month and year with the target date and navigate dynamically until they match. Then I select the day within the current calendar container.”
+
+324. Pagination
+
+Pagination:
+
+1  2  3  4  5  Next
+
+Example:
+
+while (true) {
+
+    List<WebElement> rows =
+        driver.findElements(By.cssSelector("table tbody tr"));
+
+    // process rows
+
+    WebElement next =
+        driver.findElement(By.xpath("//button[text()='Next']"));
+
+    if (!next.isEnabled()) {
+        break;
+    }
+
+    next.click();
+}
+Better approach
+
+Search for required data on each page:
+
+boolean found = false;
+
+while (!found) {
+
+    List<WebElement> rows =
+        driver.findElements(By.cssSelector("table tbody tr"));
+
+    for (WebElement row : rows) {
+
+        if (row.getText().contains("John")) {
+            System.out.println("Found");
+            found = true;
+            break;
+        }
+    }
+
+    if (found) {
+        break;
+    }
+
+    WebElement next =
+        driver.findElement(By.xpath("//button[text()='Next']"));
+
+    if (!next.isEnabled()) {
+        break;
+    }
+
+    next.click();
+}
+Interview answer
+
+“For pagination, I process the current page and then check whether a next page exists. If it does, I click Next, wait for the new page or table data to load, and continue until the required data is found or there are no more pages.”
+
+325. Dynamic Web Table
+
+Suppose:
+
+Name       Age    Salary
+John       30     50000
+David      28     60000
+Smith      35     70000
+
+Get rows:
+
+List<WebElement> rows =
+    driver.findElements(
+        By.xpath("//table/tbody/tr")
+    );
+
+Get columns:
+
+List<WebElement> cells =
+    driver.findElements(
+        By.xpath("//table/tbody/tr[1]/td")
+    );
+
+Print table:
+
+for (WebElement row : rows) {
+    System.out.println(row.getText());
+}
+Find a specific row
+WebElement row = driver.findElement(
+    By.xpath("//table//tr[td[text()='John']]")
+);
+
+System.out.println(row.getText());
+Get salary of John
+String salary = driver.findElement(
+    By.xpath("//table//tr[td[text()='John']]/td[3]")
+).getText();
+Interview answer
+
+“For dynamic web tables, I don't depend on fixed row numbers. I identify the row using unique business data and then locate the required column relative to that row.”
+
+326. Infinite Scrolling
+
+There is no traditional Next button.
+
+Example:
+
+Scroll
+ ↓
+Data loads
+ ↓
+Scroll
+ ↓
+More data loads
+ ↓
+Scroll
+
+JavaScript:
+
+JavascriptExecutor js =
+    (JavascriptExecutor) driver;
+
+long previousHeight = (Long) js.executeScript(
+    "return document.body.scrollHeight"
+);
+
+while (true) {
+
+    js.executeScript(
+        "window.scrollTo(0, document.body.scrollHeight);"
+    );
+
+    Thread.sleep(2000);
+
+    long currentHeight = (Long) js.executeScript(
+        "return document.body.scrollHeight"
+    );
+
+    if (currentHeight == previousHeight) {
+        break;
+    }
+
+    previousHeight = currentHeight;
+}
+
+For production automation, I would prefer a condition-based wait rather than arbitrary Thread.sleep() where the application provides a reliable loading indicator or DOM condition.
+
+Interview answer
+
+“For infinite scrolling, I scroll toward the bottom, wait for new content to load, and compare the page height or a specific content/loading condition. I continue until no new content is loaded or my required data is found.”
+
+327. Lazy Loading
+
+Lazy loading means content loads only when it becomes visible or approaches the viewport.
+
+For example:
+
+Page loaded
+ ↓
+Only first 10 images loaded
+ ↓
+Scroll
+ ↓
+Next images loaded
+
+I can scroll to the element:
+
+WebElement image =
+    driver.findElement(By.id("image100"));
+
+((JavascriptExecutor) driver)
+    .executeScript(
+        "arguments[0].scrollIntoView(true);",
+        image
+    );
+
+Then wait:
+
+wait.until(
+    ExpectedConditions.visibilityOf(image)
+);
+
+For an image, sometimes I need to verify that the actual resource has loaded:
+
+Boolean loaded = (Boolean)
+    ((JavascriptExecutor) driver).executeScript(
+        "return arguments[0].complete && arguments[0].naturalWidth > 0;",
+        image
+    );
+Interview answer
+
+“For lazy-loaded content, I bring the required element into the viewport and wait for the application to load it. I verify the actual element state rather than relying only on a fixed sleep.”
+
+328. File Upload
+
+If the application has:
+
+<input type="file">
+
+Use:
+
+driver.findElement(By.id("fileUpload"))
+      .sendKeys("C:\\TestData\\resume.pdf");
+Important
+
+You generally do not need to automate the Windows file chooser when an <input type="file"> is available.
+
+Interview answer
+
+“For file upload, if the application exposes an HTML file input, I use sendKeys() with the absolute file path. I avoid automating the operating-system file chooser because Selenium works with the HTML file input directly.”
+
+329. File Download
+
+I first configure the browser download directory.
+
+For Chrome options, for example:
+
+ChromeOptions options = new ChromeOptions();
+
+Map<String, Object> prefs = new HashMap<>();
+
+prefs.put(
+    "download.default_directory",
+    "C:\\Downloads"
+);
+
+options.setExperimentalOption("prefs", prefs);
+
+WebDriver driver = new ChromeDriver(options);
+
+Then click:
+
+driver.findElement(By.id("download")).click();
+
+Then verify the file exists.
+
+File file =
+    new File("C:\\Downloads\\report.pdf");
+
+if (file.exists()) {
+    System.out.println("Download successful");
+}
+Better validation
+
+Also verify:
+
+filename
+extension
+file size
+content if required
+Interview answer
+
+“For downloads, I configure a known download directory, trigger the download, and verify that the expected file exists. Depending on the requirement, I also validate file name, size, extension, or content.”
+
+330. Authentication Popup
+
+Example:
+
+Username:
+Password:
+OK
+
+For HTTP Basic Authentication, depending on the browser/application, a URL-based approach may work:
+
+driver.get(
+    "https://username:password@example.com"
+);
+
+But modern browsers and applications may restrict or handle this differently.
+
+Better interview response
+
+“First I identify whether it is HTTP Basic Authentication or a normal application login. For HTTP Basic Auth, I use an appropriate browser/API-supported authentication mechanism rather than treating it as a normal DOM element. For a normal login page, I automate the username and password fields.”
+
+331. Browser Notification
+
+Example:
+
+Allow notifications?
+Block
+Allow
+
+This is a browser permission, not a normal DOM popup.
+
+With Chrome options:
+
+ChromeOptions options = new ChromeOptions();
+
+Map<String, Object> prefs = new HashMap<>();
+
+prefs.put(
+    "profile.default_content_setting_values.notifications",
+    2
+);
+
+options.setExperimentalOption("prefs", prefs);
+
+WebDriver driver = new ChromeDriver(options);
+Interview answer
+
+“Browser notifications are browser-level permissions, so I handle them through browser capabilities/options rather than Selenium's alert API.”
+
+332. SSL Warning
+
+Example:
+
+Your connection is not private
+
+For a test environment with a self-signed certificate:
+
+ChromeOptions options = new ChromeOptions();
+
+options.setAcceptInsecureCerts(true);
+
+WebDriver driver = new ChromeDriver(options);
+
+Or:
+
+ChromeOptions options = new ChromeOptions();
+options.setAcceptInsecureCerts(true);
+Important
+
+Don't blindly use this in production.
+
+Interview answer
+
+“For test environments using self-signed or invalid certificates, I can configure the browser to accept insecure certificates. I use this only when it is appropriate for the test environment.”
+
+333. CAPTCHA
+
+This is a very important interview question.
+
+Don't say:
+
+"I'll automate CAPTCHA."
+
+That's generally not the right approach.
+
+CAPTCHA exists specifically to distinguish humans from automation.
+
+Correct approach
+
+For test environments:
+
+Disable CAPTCHA.
+Use a test CAPTCHA.
+Use a bypass mechanism provided by developers.
+Mock the CAPTCHA verification.
+Use a dedicated test environment.
+Interview answer
+
+“I don't try to automate or bypass a real CAPTCHA in a production flow. For automation environments, I work with the development team to disable it, mock it, or provide a test-only bypass mechanism. The objective is to test the application's business flow rather than defeat the anti-bot mechanism.”
+
+🔥 This is the answer I would give in an interview.
+
+334. OTP
+
+OTP is similar.
+
+Don't hard-code:
+
+driver.findElement(By.id("otp"))
+      .sendKeys("123456");
+
+unless it's explicitly a test OTP.
+
+Real automation approaches
+
+For a test environment:
+
+Application
+    ↓
+OTP service
+    ↓
+Test mailbox / test API / database
+    ↓
+Automation retrieves OTP
+    ↓
+Enter OTP
+
+Possible test architecture:
+
+User requests OTP
+       ↓
+Backend generates OTP
+       ↓
+Test service/mailbox
+       ↓
+Automation retrieves OTP
+       ↓
+Enter OTP
+Interview answer
+
+“I don't try to intercept a real user's OTP. In automation environments, I use a test OTP, mock the OTP service, or retrieve the OTP through an approved test API/mailbox mechanism. This keeps the test deterministic and secure.”
+
+335. Shadow DOM
+
+Shadow DOM encapsulates elements inside a component.
+
+Example:
+
+Main DOM
+   |
+   └── shadow-root
+          |
+          └── button
+
+Modern Selenium supports Shadow DOM access.
+
+Example:
+
+WebElement host =
+    driver.findElement(By.cssSelector("my-component"));
+
+SearchContext shadowRoot =
+    host.getShadowRoot();
+
+WebElement button =
+    shadowRoot.findElement(
+        By.cssSelector("button")
+    );
+
+button.click();
+Interview answer
+
+“Shadow DOM encapsulates a component's DOM. I first locate the shadow host, get its shadow root, and then locate the required element within that shadow root using the returned SearchContext.”
+
+336. React Application
+
+React applications frequently update the DOM dynamically without full-page refreshes.
+
+Common problems:
+
+Stale elements
+Dynamic attributes
+Asynchronous rendering
+Elements appearing after API calls
+Re-rendering
+Click interception
+How I handle React
+
+Use stable locators:
+
+By button = By.cssSelector(
+    "button[data-testid='login']"
+);
+
+Use explicit waits:
+
+wait.until(
+    ExpectedConditions.elementToBeClickable(button)
+).click();
+
+If React re-renders the element, locate it again instead of holding an old WebElement.
+
+Interview answer
+
+“React itself doesn't require a special Selenium framework. The important part is handling asynchronous rendering and DOM re-renders correctly. I use stable attributes such as test IDs where available, explicit waits, and fresh element lookup when React replaces DOM nodes.”
+
+337. Angular Application
+
+Angular applications also have:
+
+asynchronous operations
+dynamic DOM
+API calls
+components
+dynamic elements
+
+I use:
+
+WebDriverWait
+
+with conditions such as:
+
+visibilityOfElementLocated()
+
+or:
+
+elementToBeClickable()
+Interview answer
+
+“For Angular applications, I focus on synchronization and stable locators rather than using fixed sleeps. I wait for the application state or required element condition before interacting with it.”
+
+🔥 VERY IMPORTANT: REAL INTERVIEW SCENARIO
+
+An interviewer may combine several of these.
+
+Question:
+
+“Your Selenium script was working yesterday. Today the application was deployed, and the script is failing with StaleElementReferenceException. What will you do?”
+
+Strong SDET answer:
+
+“First I will check the failure details, including the stack trace, screenshot, logs and the exact step where it failed. Then I will inspect the current DOM and compare it with the previous version. If the application has re-rendered or replaced the element, the previously stored WebElement is no longer valid. I will locate the element again using a stable locator and synchronize using an appropriate explicit wait. If this is happening because of an application change, I will update the locator or framework component rather than adding an arbitrary sleep.”
+
+🔥 ANOTHER VERY COMMON SCENARIO
+Interviewer:
+
+"There is a button. Selenium finds it, but clicking it gives ElementClickInterceptedException. What will you do?"
+
+Answer:
+
+“I will inspect what is covering the button. Usually it can be a loader, popup, overlay, animation, or another element. I will wait for that blocking element to disappear and then wait for the target button to become clickable. I will not immediately use JavaScript click because that can hide an actual application behavior problem.”
+
+🔥 ONE MORE
+Interviewer:
+
+"How will you automate a calendar where you don't know how many times you need to click Next?"
+
+Answer:
+
+“I will make the calendar selection data-driven. I will pass the target day, month and year. Then I will read the currently displayed month and year, compare them with the target, and click Next or Previous until they match. Finally, I will select the day within the current calendar container.”
+
+🔥 QUICK REVISION TABLE
+#	Scenario	Main Approach
+312	Dynamic element	Stable locator + explicit wait
+313	Dynamic ID	contains() / starts-with() / stable attribute
+314	AJAX	Explicit wait
+315	iframe	switchTo().frame()
+316	Hidden element	Make visible through UI flow
+317	Disabled	Perform prerequisite action / wait
+318	Covered element	Wait for overlay to disappear
+319	Changes after refresh	Stable locator
+320	Stale after refresh	Re-find element
+321	Same locator	findElements() / make locator unique
+322	Calendar	Navigate month/year + select day
+323	Dynamic calendar	Compare target/current month dynamically
+324	Pagination	Process → Next → wait → repeat
+325	Dynamic table	Find row by business data
+326	Infinite scroll	Scroll + wait + detect new content
+327	Lazy loading	Scroll into view + wait
+328	Upload	sendKeys(filePath)
+329	Download	Configure directory + verify file
+330	Auth popup	Handle according to auth mechanism
+331	Browser notification	Browser options
+332	SSL	acceptInsecureCerts
+333	CAPTCHA	Test bypass/mock/disable
+334	OTP	Test OTP/mock/approved test service
+335	Shadow DOM	getShadowRoot()
+336	React	Stable locators + synchronization + re-render handling
+337	Angular	Explicit synchronization + stable locators
+⭐ What you should memorize for interviews
+
+For almost every Selenium special scenario, your thought process should be:
+
+1. Identify the type of problem
+→ locator / synchronization / browser / DOM / application behavior
+
+2. Inspect the current DOM
+
+3. Use the most stable locator
+
+4. Use explicit wait based on the actual condition
+
+5. Handle the application behavior instead of forcing Selenium
+
+6. Capture logs/screenshots when it fails
+
+7. Avoid Thread.sleep() and unnecessary JavaScript hacks
+
+That mindset is what makes the answer sound like an experienced SDET, rather than someone who has only memorized Selenium commands.
