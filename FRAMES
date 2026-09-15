@@ -1,0 +1,513 @@
+SELENIUM FRAMES / IFRAMES — HANDS-ON
+
+Frames are another very common Selenium interview + coding topic. For an SDET interview, don't just memorize the definitions—you should be able to switch into a frame, perform an action, come back, and handle nested frames.
+
+277. What is an iframe?
+Interview answer
+
+“An iframe, or inline frame, is an HTML element used to embed another HTML document or webpage inside the current webpage. Selenium treats the iframe as a separate browsing context, so we need to switch into the frame before interacting with elements inside it.”
+
+Example HTML:
+
+<iframe id="paymentFrame">
+    
+    <!-- elements inside iframe -->
+
+</iframe>
+
+Suppose:
+
+Main Page
+│
+├── Username
+├── Password
+├── Login
+│
+└── Payment iframe
+      ├── Card Number
+      ├── Expiry
+      └── CVV
+
+If Card Number is inside the iframe, Selenium cannot directly interact with it from the main page.
+
+You first need:
+
+driver.switchTo().frame(...);
+
+Then:
+
+driver.findElement(By.id("cardNumber")).sendKeys("123456789");
+278. How do you switch to an iframe?
+
+Selenium provides:
+
+driver.switchTo().frame(...)
+
+There are 3 common ways:
+
+1. By index
+driver.switchTo().frame(0);
+2. By name or ID
+driver.switchTo().frame("paymentFrame");
+3. By WebElement
+WebElement frame = driver.findElement(By.id("paymentFrame"));
+
+driver.switchTo().frame(frame);
+279. How do you switch to iframe by index?
+
+Use:
+
+driver.switchTo().frame(index);
+
+Example:
+
+driver.switchTo().frame(0);
+
+This switches to the first frame.
+
+Example:
+
+driver.switchTo().frame(1);
+
+switches to the second frame.
+
+Complete example
+WebDriver driver = new ChromeDriver();
+
+driver.get("https://example.com");
+
+driver.switchTo().frame(0);
+
+driver.findElement(By.id("username")).sendKeys("John");
+⚠️ Interview trap: Is index recommended?
+
+You can say:
+
+“Frame index can be used when the frame order is stable, but I generally prefer using a frame ID/name or WebElement because index-based identification can become fragile when the page structure changes.”
+
+For example:
+
+driver.switchTo().frame(0);
+
+can become unreliable if developers add another iframe before it.
+
+280. How do you switch to iframe by name?
+
+If iframe has:
+
+<iframe name="paymentFrame">
+
+you can use:
+
+driver.switchTo().frame("paymentFrame");
+
+Example:
+
+driver.switchTo().frame("paymentFrame");
+
+driver.findElement(By.id("cardNumber"))
+      .sendKeys("1234567890123456");
+What can you pass?
+
+The String is typically the iframe's:
+
+name
+or id
+
+For example:
+
+<iframe id="paymentFrame" name="paymentFrame">
+
+Then:
+
+driver.switchTo().frame("paymentFrame");
+281. How do you switch to iframe using WebElement?
+
+This is often the best approach when you have a reliable locator.
+
+HTML:
+
+<iframe id="paymentFrame"></iframe>
+
+Java:
+
+WebElement frame = driver.findElement(By.id("paymentFrame"));
+
+driver.switchTo().frame(frame);
+
+Then interact with elements inside:
+
+driver.findElement(By.id("cardNumber"))
+      .sendKeys("1234567890123456");
+Full example
+WebElement paymentFrame =
+        driver.findElement(By.id("paymentFrame"));
+
+driver.switchTo().frame(paymentFrame);
+
+driver.findElement(By.id("cardNumber"))
+      .sendKeys("1234567890123456");
+
+driver.findElement(By.id("cvv"))
+      .sendKeys("123");
+⭐ Interview answer
+
+“I prefer switching using a WebElement when the frame has a stable locator because it makes the automation code more readable and less dependent on frame order.”
+
+282. How do you return to default content?
+
+This is very important.
+
+Use:
+
+driver.switchTo().defaultContent();
+
+It takes Selenium from the current iframe back to the main page.
+
+Example:
+
+driver.switchTo().frame("paymentFrame");
+
+driver.findElement(By.id("cardNumber"))
+      .sendKeys("123456789");
+
+// Come back to main page
+driver.switchTo().defaultContent();
+
+driver.findElement(By.id("login"))
+      .click();
+Remember:
+Main Page
+    ↓
+Switch into iframe
+    ↓
+Perform action
+    ↓
+defaultContent()
+    ↓
+Main Page
+🔥 defaultContent() vs parentFrame()
+
+This is an excellent interview follow-up.
+
+defaultContent()
+driver.switchTo().defaultContent();
+
+Returns directly to the main/root document.
+
+Example:
+
+Main
+ └── Frame 1
+      └── Frame 2
+           └── Frame 3
+
+From Frame 3:
+
+driver.switchTo().defaultContent();
+
+goes directly to:
+
+Main
+parentFrame()
+driver.switchTo().parentFrame();
+
+Moves one level up.
+
+Example:
+
+Main
+ └── Frame 1
+      └── Frame 2
+           └── Frame 3
+
+If currently inside Frame 3:
+
+driver.switchTo().parentFrame();
+
+→ Frame 2
+
+Again:
+
+driver.switchTo().parentFrame();
+
+→ Frame 1
+
+Again:
+
+driver.switchTo().parentFrame();
+
+→ Main.
+
+⭐ Easy memory trick
+parentFrame()
+     ↑
+one level up
+
+defaultContent()
+     ↑
+all the way to Main
+283. What is a Nested iframe?
+
+A nested iframe means:
+
+An iframe located inside another iframe.
+
+Example:
+
+Main Page
+│
+└── iframe 1
+      │
+      └── iframe 2
+            │
+            └── Element
+
+You cannot directly switch to iframe 2 from the main page if iframe 2 exists inside iframe 1.
+
+You first need to enter iframe 1.
+
+Then enter iframe 2.
+
+🔥 284. How do you handle iframe inside iframe?
+
+This is a very important hands-on coding question.
+
+Suppose HTML structure is:
+
+Main Page
+   |
+   └── Parent iframe
+          |
+          └── Child iframe
+                 |
+                 └── Button
+
+You need to switch sequentially.
+
+Step 1 — Switch to Parent iframe
+driver.switchTo().frame("parentFrame");
+Step 2 — Switch to Child iframe
+driver.switchTo().frame("childFrame");
+Step 3 — Perform operation
+driver.findElement(By.id("submit"))
+      .click();
+Complete code
+WebDriver driver = new ChromeDriver();
+
+driver.get("https://example.com");
+
+// Parent iframe
+driver.switchTo().frame("parentFrame");
+
+// Child iframe
+driver.switchTo().frame("childFrame");
+
+// Element inside child iframe
+driver.findElement(By.id("submit")).click();
+
+// Return to main page
+driver.switchTo().defaultContent();
+🔥 Nested iframe Using WebElements
+
+Suppose HTML:
+
+<iframe id="outerFrame">
+
+    <iframe id="innerFrame">
+
+        <button id="submit">Submit</button>
+
+    </iframe>
+
+</iframe>
+
+Code:
+
+WebElement outerFrame =
+        driver.findElement(By.id("outerFrame"));
+
+driver.switchTo().frame(outerFrame);
+
+WebElement innerFrame =
+        driver.findElement(By.id("innerFrame"));
+
+driver.switchTo().frame(innerFrame);
+
+driver.findElement(By.id("submit")).click();
+
+driver.switchTo().defaultContent();
+Notice something important
+
+This would not work:
+
+WebElement innerFrame =
+        driver.findElement(By.id("innerFrame"));
+
+before switching into the outer frame.
+
+Why?
+
+Because innerFrame belongs to the outer frame's DOM context, not the main page's context.
+
+🔥 Real-Time Interview Scenario
+Interviewer:
+
+“There is a payment iframe inside another iframe. How will you automate it?”
+
+Strong answer:
+
+“I would first identify the outer iframe and switch into it. Then I would locate the inner iframe from that context and switch into it. After switching to the inner iframe, I can interact with the payment elements. Once the operation is complete, I can use parentFrame() to move one level up or defaultContent() to return directly to the main document.”
+
+Then write:
+
+WebElement outerFrame =
+        driver.findElement(By.id("outerFrame"));
+
+driver.switchTo().frame(outerFrame);
+
+WebElement innerFrame =
+        driver.findElement(By.id("innerFrame"));
+
+driver.switchTo().frame(innerFrame);
+
+driver.findElement(By.id("cardNumber"))
+      .sendKeys("1234567890123456");
+
+driver.switchTo().defaultContent();
+🔥 VERY COMMON INTERVIEW QUESTION
+"Why do we need to switch to an iframe?"
+
+Answer:
+
+“Because the iframe has a separate browsing context. Selenium operates in the currently selected browsing context, so elements inside the iframe cannot normally be interacted with until Selenium switches into that frame.”
+
+🔥 What happens if you don't switch?
+
+Suppose:
+
+<iframe id="loginFrame">
+    <input id="username">
+</iframe>
+
+You write:
+
+driver.findElement(By.id("username")).sendKeys("John");
+
+You may get:
+
+NoSuchElementException
+
+because Selenium is currently searching in the main document, while the element is inside the iframe.
+
+Correct:
+
+driver.switchTo().frame("loginFrame");
+
+driver.findElement(By.id("username"))
+      .sendKeys("John");
+🔥 How do you identify whether an element is inside an iframe?
+
+During debugging, inspect the element in browser DevTools.
+
+If you see something like:
+
+<iframe>
+    ...
+</iframe>
+
+and your target element belongs to that iframe's document, Selenium needs to switch into it.
+
+🔥 Another Important Scenario
+Parent → Child → Parent
+driver.switchTo().frame("parentFrame");
+
+driver.switchTo().frame("childFrame");
+
+// Work inside child
+driver.findElement(By.id("submit")).click();
+
+// Go one level up
+driver.switchTo().parentFrame();
+
+// Now you're inside parentFrame
+
+If you want main page:
+
+driver.switchTo().defaultContent();
+🔥 Handling Multiple Iframes
+
+Suppose page has:
+
+Main Page
+
+iframe 1
+iframe 2
+iframe 3
+
+You can use:
+
+List<WebElement> frames =
+        driver.findElements(By.tagName("iframe"));
+
+System.out.println("Number of frames: " + frames.size());
+
+This is useful during debugging.
+
+Example:
+
+List<WebElement> frames =
+        driver.findElements(By.tagName("iframe"));
+
+for (WebElement frame : frames) {
+    System.out.println(frame.getAttribute("id"));
+}
+🧠 MUST-MEMORIZE FRAME CODE
+Basic iframe
+driver.switchTo().frame("frameName");
+
+driver.findElement(By.id("username"))
+      .sendKeys("John");
+
+driver.switchTo().defaultContent();
+WebElement
+WebElement frame =
+        driver.findElement(By.id("frameId"));
+
+driver.switchTo().frame(frame);
+Index
+driver.switchTo().frame(0);
+Nested iframe
+driver.switchTo().frame("outerFrame");
+
+driver.switchTo().frame("innerFrame");
+
+driver.findElement(By.id("submit")).click();
+
+driver.switchTo().defaultContent();
+One level back
+driver.switchTo().parentFrame();
+🎯 INTERVIEW CHEAT SHEET
+Question	Answer
+What is iframe?	Embedded HTML document with separate browsing context
+Switch to iframe	driver.switchTo().frame()
+By index	frame(0)
+By name/ID	frame("frameName")
+By WebElement	frame(frameElement)
+Return to main page	defaultContent()
+One level up	parentFrame()
+Nested iframe	Switch outer → inner
+Element inside iframe	First switch to iframe
+Multiple iframes	findElements(By.tagName("iframe"))
+⭐ The 5 lines you absolutely must know
+String mainWindow = driver.getWindowHandle(); // Windows topic
+
+driver.switchTo().frame("frameName");
+
+driver.switchTo().frame(0);
+
+driver.switchTo().parentFrame();
+
+driver.switchTo().defaultContent();
+
+For your interview, nested iframe + defaultContent() vs parentFrame() + all 3 ways of switching are the highest-value parts to practice.
