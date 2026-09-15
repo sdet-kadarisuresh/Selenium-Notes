@@ -1,0 +1,1157 @@
+23. AUTOMATION FRAMEWORK 🔴
+422. What is an automation framework?
+Interview answer
+
+An automation framework is a structured set of guidelines, reusable components, utilities, coding standards, and tools used to develop and maintain automated test cases efficiently.
+
+In my framework, I separate test cases from page-level actions, driver management, test data, configuration, utilities, reporting, logging, and common reusable methods.
+
+The main goal is reusability, maintainability, scalability, parallel execution, and easy debugging.
+
+Example
+
+Instead of writing this in every test:
+
+driver.findElement(By.id("username")).sendKeys("admin");
+driver.findElement(By.id("password")).sendKeys("password");
+driver.findElement(By.id("login")).click();
+
+I create:
+
+loginPage.login(username, password);
+
+This makes the test cleaner and easier to maintain.
+
+423. What are the types of automation frameworks?
+
+Common types are:
+
+1. Linear framework
+
+Tests are written sequentially without much reuse.
+
+Open browser
+Login
+Search product
+Add product
+Logout
+
+Simple but difficult to maintain.
+
+2. Modular framework
+
+Application functionality is divided into modules.
+
+Login
+Search
+Checkout
+Payment
+Logout
+
+Each module has reusable methods.
+
+3. Data-driven framework
+
+Test data is separated from test logic.
+
+Example:
+
+username | password
+user1    | pass1
+user2    | pass2
+user3    | pass3
+4. Keyword-driven framework
+
+Actions are represented using keywords:
+
+CLICK
+TYPE
+SELECT
+VERIFY
+5. Hybrid framework
+
+Combines multiple approaches.
+
+For example:
+
+POM
++
+Data Driven
++
+TestNG
++
+Utilities
++
+Reporting
++
+CI/CD
+6. BDD framework
+
+Uses tools such as Cucumber.
+
+Given user is on login page
+When user enters valid credentials
+Then user should see dashboard
+Strong interview answer
+
+In real projects, I prefer a hybrid framework, usually combining Page Object Model, data-driven testing, reusable utilities, TestNG, reporting, logging, configuration management, and CI/CD integration.
+
+424. What framework have you used?
+Strong answer
+
+I have worked with a hybrid Selenium Java framework using TestNG and Page Object Model.
+
+The framework has separate layers for test cases, page objects, driver management, configuration, utilities, test data, listeners, reporting, and logs.
+
+We use Maven for dependency management, Git for source control, and Jenkins for CI execution.
+
+TestNG is used for annotations, assertions, grouping, parameterization, and parallel execution.
+
+If they ask:
+
+"Explain your framework in detail."
+
+You should immediately draw something like:
+
+                    TestNG Tests
+                         |
+                         ↓
+                   Page Objects
+                         |
+                         ↓
+                    Base Page
+                         |
+              ---------------------
+              |                   |
+         WebDriver           Utilities
+              |
+         Driver Factory
+              |
+         ThreadLocal
+              |
+        Browser / Driver
+
+And alongside:
+
+Config
+Test Data
+Listeners
+Reports
+Logs
+Screenshots
+CI/CD
+425. Explain your framework architecture.
+
+A good architecture:
+
+                    TEST CASES
+                        |
+                        ↓
+                  PAGE OBJECTS
+                        |
+                        ↓
+                    BASE PAGE
+                        |
+             ---------------------
+             |                   |
+        DRIVER FACTORY       UTILITIES
+             |
+        THREADLOCAL
+             |
+          WEBDRIVER
+             |
+          BROWSER
+
+Supporting components:
+
+Config
+Test Data
+Listeners
+Reports
+Logs
+Screenshots
+Maven
+Git
+Jenkins
+Interview answer
+
+My framework follows a layered architecture. Test classes contain business scenarios, while page classes contain page-specific locators and actions. Common Selenium operations are maintained in BasePage. Driver creation is handled by DriverFactory. Configuration is separated from test code, and utilities handle reusable functionality such as waits, screenshots, Excel/JSON reading, and date operations.
+
+TestNG manages execution, listeners handle events such as failures, reporting captures execution results, and Jenkins triggers the framework through CI/CD.
+
+426. Explain folder structure.
+
+A typical Selenium Java framework:
+
+project
+│
+├── src
+│   ├── main
+│   │   └── java
+│   │       ├── pages
+│   │       ├── base
+│   │       ├── factory
+│   │       ├── utils
+│   │       ├── config
+│   │       └── listeners
+│   │
+│   └── test
+│       ├── java
+│       │   └── tests
+│       └── resources
+│           ├── config
+│           ├── testdata
+│           └── testng.xml
+│
+├── pom.xml
+├── logs
+├── reports
+└── screenshots
+Example
+pages/
+    LoginPage.java
+    HomePage.java
+    CheckoutPage.java
+
+tests/
+    LoginTest.java
+    CheckoutTest.java
+
+utils/
+    WaitUtils.java
+    ExcelUtils.java
+    ScreenshotUtils.java
+
+factory/
+    DriverFactory.java
+
+base/
+    BaseTest.java
+    BasePage.java
+
+listeners/
+    TestListener.java
+427. Why Page Object Model?
+Interview answer
+
+I use POM to separate test logic from UI implementation.
+
+If a locator changes, I update it in one page class instead of modifying multiple test cases.
+
+It improves maintainability, readability, reusability, and reduces code duplication.
+
+Example:
+
+Without POM:
+
+driver.findElement(By.id("loginBtn")).click();
+
+appearing in 50 tests.
+
+With POM:
+
+loginPage.clickLogin();
+
+If the locator changes, only LoginPage needs modification.
+
+428. What is POM?
+
+POM = Page Object Model.
+
+It is a design pattern where each application page/component is represented by a Java class.
+
+Example:
+
+public class LoginPage {
+
+    private WebDriver driver;
+
+    private By username = By.id("username");
+    private By password = By.id("password");
+    private By loginButton = By.id("login");
+
+    public LoginPage(WebDriver driver) {
+        this.driver = driver;
+    }
+
+    public void login(String user, String pass) {
+        driver.findElement(username).sendKeys(user);
+        driver.findElement(password).sendKeys(pass);
+        driver.findElement(loginButton).click();
+    }
+}
+
+Test:
+
+@Test
+public void loginTest() {
+
+    LoginPage loginPage = new LoginPage(driver);
+
+    loginPage.login("admin", "password");
+}
+429. POM vs PageFactory?
+POM	PageFactory
+Design pattern	Selenium support mechanism
+Organizes page classes	Initializes WebElements
+Can use By locators	Usually uses @FindBy
+Does not require PageFactory	Often used with POM
+Modern frameworks can avoid PageFactory	Less preferred in many modern frameworks
+Example PageFactory
+@FindBy(id = "username")
+WebElement username;
+
+Then:
+
+PageFactory.initElements(driver, this);
+Strong answer
+
+POM is the design pattern. PageFactory is a Selenium mechanism that can be used to initialize elements inside a page object. They are not alternatives. We can implement POM without PageFactory, and in many modern frameworks I prefer explicit locators with By and reusable wait methods.
+
+430. What is BaseTest?
+
+BaseTest contains common test setup and teardown.
+
+Example:
+
+public class BaseTest {
+
+    protected WebDriver driver;
+
+    @BeforeMethod
+    public void setUp() {
+
+        driver = DriverFactory.initDriver("chrome");
+
+        driver.get(ConfigReader.getUrl());
+    }
+
+    @AfterMethod
+    public void tearDown() {
+
+        if (driver != null) {
+            driver.quit();
+        }
+    }
+}
+
+Then:
+
+public class LoginTest extends BaseTest {
+
+    @Test
+    public void loginTest() {
+
+        LoginPage page = new LoginPage(driver);
+
+        page.login("admin", "password");
+    }
+}
+Purpose
+
+Avoid repeating:
+
+browser setup
+URL
+driver initialization
+cleanup
+
+in every test.
+
+431. What is BasePage?
+
+BasePage contains common Selenium operations.
+
+For example:
+
+public class BasePage {
+
+    protected WebDriver driver;
+
+    public BasePage(WebDriver driver) {
+        this.driver = driver;
+    }
+
+    public void click(By locator) {
+        driver.findElement(locator).click();
+    }
+
+    public void type(By locator, String text) {
+        driver.findElement(locator).sendKeys(text);
+    }
+}
+
+Page:
+
+public class LoginPage extends BasePage {
+
+    private By username = By.id("username");
+
+    public LoginPage(WebDriver driver) {
+        super(driver);
+    }
+
+    public void enterUsername(String value) {
+        type(username, value);
+    }
+}
+Difference
+
+BaseTest
+
+→ manages test lifecycle.
+
+BasePage
+
+→ manages common UI operations.
+
+432. What is Driver Factory?
+
+DriverFactory is responsible for creating and managing WebDriver instances.
+
+Example:
+
+public class DriverFactory {
+
+    public static WebDriver createDriver(String browser) {
+
+        if (browser.equalsIgnoreCase("chrome")) {
+            return new ChromeDriver();
+        }
+
+        if (browser.equalsIgnoreCase("firefox")) {
+            return new FirefoxDriver();
+        }
+
+        throw new RuntimeException("Invalid browser");
+    }
+}
+
+Then:
+
+driver = DriverFactory.createDriver("chrome");
+Why?
+
+Instead of creating drivers everywhere:
+
+new ChromeDriver();
+
+we centralize driver creation.
+
+433. What is Utility class?
+
+Utility classes contain reusable functionality.
+
+Examples:
+
+WaitUtils
+ScreenshotUtils
+ExcelUtils
+JsonUtils
+DateUtils
+FileUtils
+StringUtils
+
+Example:
+
+public class ScreenshotUtils {
+
+    public static void takeScreenshot(WebDriver driver, String name) {
+        // screenshot implementation
+    }
+}
+
+Instead of duplicating screenshot code in every test.
+
+434. What is Configuration class?
+
+Configuration class manages environment/application settings.
+
+Example:
+
+browser=chrome
+environment=qa
+baseUrl=https://qa.example.com
+timeout=20
+
+Java:
+
+String browser = properties.getProperty("browser");
+String url = properties.getProperty("baseUrl");
+Benefit
+
+Instead of:
+
+driver.get("https://qa.example.com");
+
+we use:
+
+driver.get(ConfigReader.getUrl());
+435. How do you manage test data?
+
+I keep test data separate from test code.
+
+Depending on the project:
+
+Excel
+CSV
+JSON
+Properties
+Database
+API
+
+Example:
+
+{
+  "username": "testuser",
+  "password": "testpassword"
+}
+
+For larger applications, test data can come from:
+
+Database
+API
+Data provider
+JSON
+CSV
+Important
+
+Don't put huge amounts of test data directly inside Java test methods.
+
+436. How do you manage different environments?
+
+For example:
+
+DEV
+QA
+UAT
+PROD
+
+Configuration:
+
+# qa.properties
+baseUrl=https://qa.example.com
+# uat.properties
+baseUrl=https://uat.example.com
+
+Then:
+
+mvn test -Denv=qa
+
+or:
+
+mvn test -Denv=uat
+Interview answer
+
+I externalize environment-specific configuration rather than hardcoding URLs and credentials. The environment can be selected through Maven parameters or CI/CD variables.
+
+437. How do you handle reporting?
+
+Common reporting tools include:
+
+Extent Reports
+Allure
+Surefire reports
+
+A report should show:
+
+Test name
+Status
+Execution time
+Steps
+Exception
+Screenshot
+Environment
+Browser
+
+For example, when a test fails:
+
+LoginTest
+FAILED
+
+Reason:
+ElementClickInterceptedException
+
+Screenshot:
+login_failure.png
+438. How do you implement logging?
+
+I use logging to understand what happened during execution.
+
+For example:
+
+logger.info("Opening login page");
+logger.info("Entering username");
+logger.info("Clicking login button");
+
+If failure happens:
+
+logger.error("Login failed", exception);
+
+Common logging frameworks:
+
+Log4j2
+SLF4J
+Why logging?
+
+Reports tell me what failed.
+
+Logs help me understand what happened before the failure.
+
+439. Screenshot management?
+
+I normally capture screenshots:
+
+On failure
+Test fails
+   ↓
+Listener detects failure
+   ↓
+Screenshot captured
+   ↓
+Attached to report
+
+Example:
+
+@Override
+public void onTestFailure(ITestResult result) {
+
+    ScreenshotUtils.takeScreenshot(
+        driver,
+        result.getName()
+    );
+}
+Don't capture unnecessary screenshots for every step
+
+That can make reports huge and execution slower.
+
+440. What is Listener?
+
+A TestNG listener allows us to listen to test execution events.
+
+For example:
+
+Test starts
+Test passes
+Test fails
+Test skipped
+Suite starts
+Suite ends
+
+Important interfaces:
+
+ITestListener
+ISuiteListener
+IInvokedMethodListener
+
+Example:
+
+public class TestListener implements ITestListener {
+
+    @Override
+    public void onTestFailure(ITestResult result) {
+
+        // screenshot
+        // logging
+        // report update
+    }
+}
+
+Typical usage:
+
+TestNG
+ ↓
+Listener
+ ↓
+Failure detected
+ ↓
+Screenshot
+ ↓
+Log
+ ↓
+Report
+441. What is Retry mechanism?
+
+Retry mechanism reruns failed tests automatically when appropriate.
+
+Example:
+
+public class RetryAnalyzer implements IRetryAnalyzer {
+
+    private int count = 0;
+    private int maxRetry = 2;
+
+    @Override
+    public boolean retry(ITestResult result) {
+
+        if (count < maxRetry) {
+            count++;
+            return true;
+        }
+
+        return false;
+    }
+}
+Important interview point
+
+Don't say:
+
+"I retry every failed test."
+
+Instead:
+
+I use retry selectively. I first investigate whether the failure is a genuine product defect or a transient automation/environment issue. Retry should not be used to hide real defects.
+
+That's a strong SDET answer.
+
+442. How do you implement parallel execution?
+
+TestNG allows parallel execution.
+
+Example:
+
+<suite name="Regression" parallel="tests" thread-count="4">
+
+Possible levels:
+
+methods
+tests
+classes
+
+Example:
+
+parallel="tests"
+thread-count="4"
+
+means up to four tests can execute concurrently.
+
+Benefits
+500 tests sequentially
+        ↓
+Very long execution
+
+Parallel execution
+        ↓
+Reduced execution time
+
+But parallel execution requires:
+
+thread-safe driver
+isolated test data
+no shared mutable state
+thread-safe utilities
+443. What is ThreadLocal WebDriver?
+
+This is very important for SDET interviews.
+
+When tests run in parallel, we should not allow multiple threads to share the same WebDriver.
+
+Instead:
+
+Thread 1 → Chrome 1
+Thread 2 → Chrome 2
+Thread 3 → Chrome 3
+Thread 4 → Chrome 4
+
+Using:
+
+private static ThreadLocal<WebDriver> driver =
+        new ThreadLocal<>();
+
+Example:
+
+public class DriverManager {
+
+    private static ThreadLocal<WebDriver> driver =
+            new ThreadLocal<>();
+
+    public static void setDriver(WebDriver webDriver) {
+        driver.set(webDriver);
+    }
+
+    public static WebDriver getDriver() {
+        return driver.get();
+    }
+
+    public static void unload() {
+        driver.remove();
+    }
+}
+Why?
+
+Without ThreadLocal:
+
+Thread 1 ─┐
+Thread 2 ─┼──> Same driver ❌
+Thread 3 ─┘
+
+Potential problems:
+
+wrong browser
+wrong page
+session conflicts
+test interference
+
+With ThreadLocal:
+
+Thread 1 → Driver 1
+Thread 2 → Driver 2
+Thread 3 → Driver 3
+
+Much safer for parallel execution.
+
+444. How do you manage browsers?
+
+I don't hardcode browser creation inside every test.
+
+I use configuration:
+
+browser=chrome
+
+Then:
+
+DriverFactory.createDriver(browser);
+
+For CI:
+
+mvn test -Dbrowser=chrome
+
+or:
+
+mvn test -Dbrowser=firefox
+
+For larger frameworks, browser capabilities/options can also be managed centrally.
+
+445. How do you manage URLs?
+
+Never hardcode URLs inside every test.
+
+Bad:
+
+driver.get("https://qa.example.com/login");
+
+Better:
+
+baseUrl=https://qa.example.com
+
+Then:
+
+driver.get(ConfigReader.getBaseUrl());
+
+For multiple environments:
+
+qa.properties
+uat.properties
+dev.properties
+446. How do you manage credentials?
+
+I don't hardcode credentials inside test classes.
+
+Bad:
+
+login("admin", "Password123");
+
+Instead credentials can come from:
+
+Environment variables
+CI/CD secrets
+Secret managers
+Encrypted configuration
+
+For example:
+
+String username = System.getenv("TEST_USERNAME");
+String password = System.getenv("TEST_PASSWORD");
+447. How do you manage test data?
+
+I classify data based on its purpose.
+
+Static data
+
+Can be maintained in:
+
+JSON
+CSV
+Excel
+Dynamic data
+
+Generate during runtime:
+
+String email =
+    "test" + System.currentTimeMillis() + "@example.com";
+Database data
+
+Retrieve using SQL where necessary.
+
+API-generated data
+
+Create data through API and use it in UI tests.
+
+For example:
+
+API → create customer
+       ↓
+UI → search customer
+       ↓
+Validate customer
+
+This is a good real-world automation strategy.
+
+448. How do you avoid hard-coded data?
+
+I externalize:
+
+URLs
+credentials
+browser
+timeouts
+test data
+environment
+API endpoints
+
+Instead of:
+
+driver.get("https://qa.company.com");
+
+use:
+
+driver.get(config.getBaseUrl());
+
+Instead of:
+
+login("admin", "password");
+
+use:
+
+login(testData.getUsername(), testData.getPassword());
+449. How do you handle secrets?
+
+This is an important real-project question.
+
+I never commit passwords, tokens, API keys, or client secrets to Git.
+
+Instead I use:
+
+Jenkins Credentials
+Environment Variables
+AWS Secrets Manager
+Azure Key Vault
+HashiCorp Vault
+
+For example:
+
+Jenkins
+   ↓
+Secret credential
+   ↓
+Environment variable
+   ↓
+Automation framework
+
+Also:
+
+don't print secrets in logs
+don't put them in screenshots/reports
+don't commit .env/secret files
+rotate credentials when required
+Excellent interview statement
+
+Credentials should be treated as secrets, not test data.
+
+450. How do you maintain 1,000 tests?
+
+This is a very important senior-level question.
+
+Don't answer:
+
+"I maintain 1,000 test cases manually."
+
+Answer with a framework strategy.
+
+My approach
+                    1000 TESTS
+                         |
+          ┌──────────────┼──────────────┐
+          ↓              ↓              ↓
+       POM            Utilities       Test Data
+          ↓              ↓              ↓
+     Reusable        Common code    Externalized
+     pages
+          |
+          ↓
+      TestNG
+          |
+     Groups/Tags
+          |
+    ┌─────┼─────┐
+    ↓     ↓     ↓
+  Smoke  Sanity Regression
+          |
+          ↓
+       Parallel
+          |
+          ↓
+        CI/CD
+          |
+          ↓
+       Reports
+Specific practices
+
+1. POM
+
+Avoid duplicate UI code.
+
+2. Reusable components
+
+For example:
+
+LoginPage
+HeaderComponent
+MenuComponent
+CalendarComponent
+TableComponent
+
+3. TestNG groups
+
+@Test(groups = "smoke")
+@Test(groups = "regression")
+
+4. Parallel execution
+
+Reduce execution time.
+
+5. Data-driven testing
+
+One test can execute against multiple datasets.
+
+6. Centralized configuration
+
+Avoid 1,000 hardcoded URLs/configurations.
+
+7. CI/CD
+
+Run suites automatically.
+
+Developer commit
+      ↓
+Git
+      ↓
+Jenkins
+      ↓
+Build
+      ↓
+Smoke
+      ↓
+Regression
+      ↓
+Reports
+
+8. Failure analysis
+
+Use:
+
+Logs
+Screenshots
+Stack traces
+Videos where applicable
+Reports
+
+9. Flaky-test management
+
+Track flaky tests separately instead of continuously retrying everything.
+
+10. Code review
+
+Automation code should follow coding standards and be reviewed just like production code.
+
+🔥 VERY IMPORTANT: "Explain your framework" — 2-minute answer
+
+If the interviewer says:
+
+"Okay, explain your automation framework."
+
+Give this answer:
+
+"I have worked with a hybrid Selenium Java framework using TestNG and Page Object Model.
+
+The framework is divided into different layers. Test classes contain the actual test scenarios, while page classes contain locators and page-specific actions. We have a BasePage for common Selenium operations such as click, type, wait, and element handling.
+
+Driver creation is centralized in DriverFactory, and for parallel execution we use ThreadLocal WebDriver so each thread gets its own browser session.
+
+Configuration such as browser, environment and URLs is externalized rather than hardcoded. Test data is also maintained separately using appropriate data sources such as JSON, Excel, CSV or APIs depending on the requirement.
+
+We use TestNG for test execution, annotations, groups, DataProvider and parallel execution. Listeners are used for failure handling, screenshots and reporting. Logging is implemented to help with debugging.
+
+The framework is integrated with Maven, Git and Jenkins. Jenkins can trigger smoke or regression suites based on parameters, and the execution results are published through reports.
+
+The main objective of the framework is maintainability, reusability, scalability, parallel execution and easy failure analysis."
+
+🔥 Framework Architecture You Should Memorize
+
+For your 2nd round + client round, remember this structure:
+
+                    ┌───────────────┐
+                    │   TEST CASES  │
+                    └───────┬───────┘
+                            ↓
+                    ┌───────────────┐
+                    │  PAGE OBJECTS │
+                    └───────┬───────┘
+                            ↓
+                    ┌───────────────┐
+                    │   BASE PAGE   │
+                    └───────┬───────┘
+                            ↓
+                    ┌───────────────┐
+                    │ DRIVER FACTORY│
+                    └───────┬───────┘
+                            ↓
+                    ┌───────────────┐
+                    │  THREADLOCAL  │
+                    └───────┬───────┘
+                            ↓
+                    ┌───────────────┐
+                    │   WEBDRIVER   │
+                    └───────┬───────┘
+                            ↓
+                         BROWSER
+
+
+     ┌──────────────┐   ┌──────────────┐
+     │ Configuration│   │  Test Data   │
+     └──────────────┘   └──────────────┘
+
+     ┌──────────────┐   ┌──────────────┐
+     │   Utilities  │   │  Listeners   │
+     └──────────────┘   └──────────────┘
+
+     ┌──────────────┐   ┌──────────────┐
+     │    Logging   │   │   Reporting  │
+     └──────────────┘   └──────────────┘
+
+                       ↓
+                    TestNG
+                       ↓
+                     Maven
+                       ↓
+                     Git
+                       ↓
+                    Jenkins
+                       ↓
+                     CI/CD
+🔴 The 10 questions from this section I would prioritize
+
+If you're short on interview-preparation time, master these first:
+
+Explain your automation framework.
+Explain framework architecture.
+What framework have you used?
+Why POM?
+POM vs PageFactory.
+BaseTest vs BasePage.
+DriverFactory and ThreadLocal WebDriver.
+How do you handle test data/configuration/secrets?
+How do you implement parallel execution?
+How do you maintain 1,000 automation tests?
+
+These are the questions where an interviewer can quickly distinguish someone who knows Selenium syntax from someone who understands real automation engineering.
