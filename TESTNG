@@ -1,0 +1,858 @@
+21. TESTNG 🔴 — INTERVIEW ANSWERS
+371. What is TestNG?
+Simple
+
+TestNG is a testing framework for Java inspired by JUnit. It provides annotations, assertions, grouping, parameterization, parallel execution, listeners, reporting, and test dependencies.
+
+Interview answer
+
+“TestNG is a Java-based testing framework that I use with Selenium to organize and execute automation test cases. It provides annotations such as @Test, @BeforeMethod, and @AfterMethod, along with features like DataProvider, grouping, dependencies, parallel execution, assertions, listeners, and reporting. In my automation framework, TestNG acts as the test execution layer.”
+
+372. Why TestNG?
+
+TestNG provides features that are very useful for Selenium automation:
+
+Annotations
+Test grouping
+Priority
+Dependencies
+DataProvider
+Parallel execution
+Assertions
+Listeners
+Retry mechanism
+testng.xml
+Reports
+Interview answer
+
+“I prefer TestNG because it provides strong support for automation frameworks. For example, I can execute tests in parallel, parameterize tests using DataProvider, group smoke and regression tests, control dependencies, capture failures using listeners, and generate execution reports.”
+
+373. TestNG annotations?
+
+Important annotations:
+
+@BeforeSuite
+@BeforeTest
+@BeforeClass
+@BeforeMethod
+
+@Test
+
+@AfterMethod
+@AfterClass
+@AfterTest
+@AfterSuite
+
+There are also:
+
+@DataProvider
+@Parameters
+@Listeners
+@Factory
+374. Annotation execution order?
+
+Typical execution order:
+
+@BeforeSuite
+    ↓
+@BeforeTest
+    ↓
+@BeforeClass
+    ↓
+@BeforeMethod
+    ↓
+@Test
+    ↓
+@AfterMethod
+    ↓
+@AfterClass
+    ↓
+@AfterTest
+    ↓
+@AfterSuite
+
+Example:
+
+@BeforeSuite
+public void beforeSuite() {}
+
+@BeforeTest
+public void beforeTest() {}
+
+@BeforeClass
+public void beforeClass() {}
+
+@BeforeMethod
+public void beforeMethod() {}
+
+@Test
+public void testLogin() {}
+
+@AfterMethod
+public void afterMethod() {}
+
+@AfterClass
+public void afterClass() {}
+
+@AfterTest
+public void afterTest() {}
+
+@AfterSuite
+public void afterSuite() {}
+Interview tip
+
+Don't simply memorize the order. Explain what each level is used for.
+
+375. What is @BeforeSuite?
+
+Runs once before all tests in the entire suite.
+
+@BeforeSuite
+public void setupSuite() {
+    System.out.println("Suite setup");
+}
+Real-time use
+
+For:
+
+Global configuration
+Report initialization
+Environment setup
+Database setup
+Interview answer
+
+“I use @BeforeSuite for activities that need to happen only once for the complete test suite, such as initializing reporting or common suite-level configuration.”
+
+376. What is @BeforeTest?
+
+Runs before the <test> tag defined in testng.xml.
+
+@BeforeTest
+public void setupTest() {
+}
+
+Useful when different <test> sections require different configurations.
+
+377. What is @BeforeClass?
+
+Runs once before the first test method of a class.
+
+@BeforeClass
+public void setupClass() {
+}
+Real-time use
+
+For class-level setup such as:
+
+Creating page objects
+Initializing class-level resources
+378. What is @BeforeMethod?
+
+Runs before every @Test method.
+
+@BeforeMethod
+public void setup() {
+    driver = new ChromeDriver();
+}
+
+If there are 5 test methods, it normally executes 5 times.
+
+Real-time use
+
+Very commonly used for:
+
+Launch browser
+Navigate to application
+Login
+379. What is @Test?
+
+@Test identifies a method as a TestNG test method.
+
+@Test
+public void loginTest() {
+    System.out.println("Login test");
+}
+
+TestNG discovers and executes this method.
+
+380. What is @AfterMethod?
+
+Runs after every @Test method.
+
+@AfterMethod
+public void tearDown() {
+    driver.quit();
+}
+Real-time use
+
+Commonly used for:
+
+Logout
+Browser cleanup
+Screenshot on failure
+Clearing test data
+381. What is @AfterClass?
+
+Runs after all test methods in a particular class have completed.
+
+@AfterClass
+public void closeClass() {
+}
+382. What is @AfterTest?
+
+Runs after the <test> section in testng.xml.
+
+@AfterTest
+public void afterTest() {
+}
+383. What is @AfterSuite?
+
+Runs once after the complete TestNG suite finishes.
+
+@AfterSuite
+public void afterSuite() {
+}
+Real-time use
+
+For:
+
+Closing reporting
+Sending final execution summary
+Cleaning global resources
+384. What is priority in TestNG?
+
+priority controls the execution order of test methods.
+
+@Test(priority = 1)
+public void login() {}
+
+@Test(priority = 2)
+public void searchProduct() {}
+
+@Test(priority = 3)
+public void logout() {}
+
+Execution:
+
+login
+searchProduct
+logout
+Important interview point
+
+Don't make tests unnecessarily dependent on priority.
+
+“I use priority only when execution order is genuinely required. I generally prefer independent tests because independent tests are easier to execute in parallel and maintain.”
+
+385. What is dependsOnMethods?
+
+It makes one test dependent on another test.
+
+@Test
+public void login() {
+}
+
+@Test(dependsOnMethods = "login")
+public void searchProduct() {
+}
+
+If login() fails, searchProduct() is skipped.
+
+Interview answer
+
+“I use dependsOnMethods when there is a genuine business dependency between tests. However, I avoid unnecessary dependencies because they can cause cascading skips and reduce parallel execution.”
+
+386. What is dependsOnGroups?
+
+A test can depend on an entire group.
+
+@Test(groups = "login")
+public void login() {
+}
+
+@Test(dependsOnGroups = "login")
+public void checkout() {
+}
+
+The checkout test executes only after the required group has successfully completed.
+
+387. What are groups?
+
+Groups allow us to categorize tests.
+
+@Test(groups = "smoke")
+public void loginTest() {}
+
+@Test(groups = "regression")
+public void searchTest() {}
+
+@Test(groups = "regression")
+public void paymentTest() {}
+
+Then execute selected groups through testng.xml.
+
+<groups>
+    <run>
+        <include name="smoke"/>
+    </run>
+</groups>
+Real-time groups
+
+Typical groups:
+
+smoke
+sanity
+regression
+integration
+api
+ui
+critical
+388. What is DataProvider?
+
+@DataProvider is used for data-driven testing.
+
+Example:
+
+@DataProvider(name = "loginData")
+public Object[][] getLoginData() {
+    return new Object[][] {
+        {"user1", "pass1"},
+        {"user2", "pass2"},
+        {"user3", "pass3"}
+    };
+}
+
+@Test(dataProvider = "loginData")
+public void loginTest(String username, String password) {
+    System.out.println(username + " " + password);
+}
+
+The test executes three times.
+
+Real-time use
+
+Instead of creating:
+
+loginTestUser1()
+loginTestUser2()
+loginTestUser3()
+
+we create one test and provide multiple datasets.
+
+389. What are parameters in TestNG?
+
+@Parameters allows values to be passed from testng.xml.
+
+testng.xml
+<parameter name="browser" value="chrome"/>
+
+Java:
+
+@Parameters("browser")
+@BeforeMethod
+public void setup(String browser) {
+
+    if (browser.equals("chrome")) {
+        driver = new ChromeDriver();
+    }
+}
+DataProvider vs Parameters
+DataProvider	Parameters
+Multiple test data	Configuration values
+Method-level data	Usually XML-level values
+Supports multiple datasets	Usually predefined parameter
+Good for data-driven testing	Good for browser/environment configuration
+Strong interview answer
+
+“I use @Parameters mainly for configuration values such as browser or environment, whereas I use @DataProvider when I need to execute the same test with multiple sets of test data.”
+
+390. What is invocationCount?
+
+It specifies how many times a test should execute.
+
+@Test(invocationCount = 5)
+public void testSearch() {
+}
+
+The test executes 5 times.
+
+Can also combine with parallel:
+
+@Test(
+    invocationCount = 10,
+    threadPoolSize = 3
+)
+public void testSearch() {
+}
+391. What is timeOut?
+
+It defines the maximum time allowed for a test.
+
+@Test(timeOut = 5000)
+public void testLogin() {
+}
+
+If execution exceeds the specified timeout, TestNG marks the test as failed.
+
+Important
+
+This is different from Selenium's explicit wait.
+
+TestNG timeout controls test execution time; Selenium explicit wait waits for a specific condition.
+
+392. What is expectedExceptions?
+
+Used when a test is expected to throw an exception.
+
+@Test(expectedExceptions = ArithmeticException.class)
+public void divisionTest() {
+    int result = 10 / 0;
+}
+
+If ArithmeticException occurs → test passes.
+
+If no exception occurs → test fails.
+
+393. What is enabled=false?
+
+It disables a test.
+
+@Test(enabled = false)
+public void oldTest() {
+}
+
+TestNG will not execute it.
+
+Interview tip
+
+Don't use this as a permanent solution for broken tests.
+
+“I use enabled=false temporarily when a test should not participate in execution, but I would normally track the reason through defect or test maintenance rather than permanently disabling tests.”
+
+394. What are assertions?
+
+Assertions validate expected vs actual results.
+
+Example:
+
+Assert.assertEquals(actualTitle, expectedTitle);
+
+If assertion passes → test continues.
+
+If assertion fails → test fails.
+
+Common assertions:
+
+Assert.assertEquals()
+Assert.assertNotEquals()
+Assert.assertTrue()
+Assert.assertFalse()
+Assert.assertNull()
+Assert.assertNotNull()
+395. What is Hard Assertion?
+
+Hard assertion immediately stops the current test method when the assertion fails.
+
+Assert.assertEquals(actual, expected);
+
+System.out.println("This may not execute");
+
+If assertion fails, subsequent statements in that test method won't execute.
+
+Real-time use
+
+Use hard assertion for critical validations.
+
+Example:
+
+Assert.assertTrue(loginPage.isDisplayed());
+
+If login page isn't displayed, continuing the test doesn't make sense.
+
+396. What is Soft Assertion?
+
+Soft assertions allow multiple validations to execute before reporting failures.
+
+SoftAssert softAssert = new SoftAssert();
+
+softAssert.assertEquals(actualTitle, expectedTitle);
+softAssert.assertTrue(isLogoDisplayed);
+softAssert.assertEquals(actualUser, expectedUser);
+
+softAssert.assertAll();
+VERY IMPORTANT
+
+Always call:
+
+softAssert.assertAll();
+
+Otherwise failures may not be reported correctly.
+
+Hard vs Soft
+Hard	Soft
+Stops after failure	Continues
+Immediate failure	Failure reported at assertAll()
+Critical validation	Multiple independent validations
+397. What are TestNG listeners?
+
+Listeners allow us to listen to TestNG execution events and perform custom actions.
+
+Examples:
+
+Test started
+Test passed
+Test failed
+Test skipped
+Suite started
+Suite finished
+Real-time use
+
+I commonly use listeners for:
+
+Screenshot capture
+Logging
+Reporting
+Failure analysis
+Retry handling
+398. What is ITestListener?
+
+ITestListener is a TestNG listener interface.
+
+Important methods:
+
+onTestStart()
+onTestSuccess()
+onTestFailure()
+onTestSkipped()
+
+Example:
+
+public class TestListener implements ITestListener {
+
+    @Override
+    public void onTestFailure(ITestResult result) {
+        System.out.println("Test failed: "
+                + result.getName());
+    }
+}
+Real-time screenshot example
+@Override
+public void onTestFailure(ITestResult result) {
+
+    // capture screenshot
+    // attach screenshot to report
+    // log failure details
+}
+Strong interview answer
+
+“I use ITestListener for cross-cutting activities such as screenshot capture, logging and reporting. This avoids duplicating failure-handling code inside every test case.”
+
+399. What is Retry Analyzer?
+
+Retry Analyzer allows a failed test to be executed again automatically.
+
+Example:
+
+public class RetryAnalyzer
+        implements IRetryAnalyzer {
+
+    private int count = 0;
+    private int maxRetry = 2;
+
+    @Override
+    public boolean retry(ITestResult result) {
+
+        if (count < maxRetry) {
+            count++;
+            return true;
+        }
+
+        return false;
+    }
+}
+
+Then:
+
+@Test(retryAnalyzer = RetryAnalyzer.class)
+public void paymentTest() {
+}
+
+If it fails:
+
+1st attempt → Fail
+2nd attempt → Retry
+3rd attempt → Retry
+Important senior-level point
+
+Don't blindly retry every failure.
+
+“I use retry mainly for known transient failures such as temporary environment or network instability. I don't use retry to hide genuine application defects.”
+
+400. What is testng.xml?
+
+testng.xml is a configuration file used to control TestNG execution.
+
+It can define:
+
+Test classes
+Groups
+Parameters
+Parallel execution
+Thread count
+Included/excluded tests
+
+Example:
+
+<!DOCTYPE suite SYSTEM
+    "https://testng.org/testng-1.0.dtd">
+
+<suite name="RegressionSuite">
+
+    <test name="LoginTests">
+
+        <classes>
+            <class name="tests.LoginTest"/>
+            <class name="tests.SearchTest"/>
+        </classes>
+
+    </test>
+
+</suite>
+401. What is parallel execution?
+
+Parallel execution means executing multiple tests at the same time using multiple threads.
+
+Instead of:
+
+Test 1
+ ↓
+Test 2
+ ↓
+Test 3
+
+we can execute:
+
+Thread 1 → Test 1
+Thread 2 → Test 2
+Thread 3 → Test 3
+
+This reduces execution time.
+
+Real-time example
+
+Suppose 300 regression tests take 3 hours sequentially.
+
+With proper parallelization, execution time may be significantly reduced.
+
+But the exact reduction depends on:
+
+Number of tests
+Thread count
+Environment capacity
+Browser/grid capacity
+Test dependencies
+402. What is thread-count?
+
+thread-count specifies the maximum number of threads used for parallel execution.
+
+<suite name="Regression"
+       parallel="methods"
+       thread-count="5">
+
+This allows up to 5 parallel execution threads.
+
+Important
+
+Thread count should not simply be set extremely high.
+
+“I choose thread count based on infrastructure capacity, Selenium Grid or cloud capacity, application stability and test independence.”
+
+403. What is parallel="methods"?
+
+It executes test methods in parallel.
+
+<suite name="Suite"
+       parallel="methods"
+       thread-count="5">
+
+Example:
+
+Thread 1 → testLogin()
+Thread 2 → testSearch()
+Thread 3 → testPayment()
+404. What is parallel="classes"?
+
+Different test classes execute in parallel.
+
+<suite name="Suite"
+       parallel="classes"
+       thread-count="3">
+
+Example:
+
+Thread 1 → LoginTest
+Thread 2 → SearchTest
+Thread 3 → PaymentTest
+
+Methods within a class generally remain sequential relative to that class.
+
+405. What is parallel="tests"?
+
+Different <test> tags in testng.xml execute in parallel.
+
+Example:
+
+<suite name="Suite"
+       parallel="tests"
+       thread-count="3">
+
+    <test name="ChromeTests">
+        ...
+    </test>
+
+    <test name="FirefoxTests">
+        ...
+    </test>
+
+</suite>
+
+This is useful when you want separate test configurations to run concurrently.
+
+406. What is DataProvider parallel?
+
+By default, DataProvider executions can be sequential.
+
+We can enable parallel execution:
+
+@DataProvider(
+    name = "loginData",
+    parallel = true
+)
+public Object[][] getData() {
+
+    return new Object[][] {
+        {"user1", "pass1"},
+        {"user2", "pass2"},
+        {"user3", "pass3"},
+        {"user4", "pass4"}
+    };
+}
+
+Now multiple datasets can execute concurrently.
+
+Critical Selenium interview point
+
+When running Selenium tests in parallel, do not share one WebDriver instance across threads.
+
+Use ThreadLocal<WebDriver> or another thread-safe driver management approach.
+
+407. How do you rerun failed tests?
+
+There are several approaches.
+
+Approach 1 — TestNG failed-test XML
+
+After execution, TestNG generates:
+
+test-output/testng-failed.xml
+
+This can be used to rerun failed tests.
+
+Approach 2 — Retry Analyzer
+@Test(retryAnalyzer = RetryAnalyzer.class)
+public void testPayment() {
+}
+
+This retries during execution.
+
+Approach 3 — CI pipeline
+
+In CI/CD, failed tests can be collected and rerun through the pipeline.
+
+Strong interview answer
+
+“For transient failures, I can use Retry Analyzer with a limited retry count. For analyzing the failed suite, TestNG also generates testng-failed.xml, which can be used to rerun failed tests. In CI, I additionally configure the pipeline to handle failed-test reruns where appropriate.”
+
+408. How do you generate reports?
+
+TestNG itself generates basic execution reports.
+
+Typically:
+
+test-output/
+
+contains TestNG results.
+
+In a real framework, I usually integrate a reporting solution such as:
+
+Allure
+ExtentReports
+
+depending on project requirements.
+
+Typical reporting flow
+TestNG
+   ↓
+ITestListener
+   ↓
+Capture failure
+   ↓
+Screenshot
+   ↓
+Logs
+   ↓
+Test result
+   ↓
+Allure / Extent Report
+Strong 5-year SDET answer
+
+“In my framework, TestNG manages test execution and listeners capture execution events. On failure, the listener captures the exception, screenshot and relevant logs and attaches them to the report. We integrate a reporting solution such as Allure or ExtentReports so that the team can see passed, failed and skipped tests along with failure details. The reports are also published as CI/CD build artifacts.”
+
+🔥 VERY IMPORTANT TESTNG INTERVIEW QUESTIONS TO MASTER
+
+For your SDET / Automation 2nd round + client round, don't give equal importance to all 38 questions.
+
+These are the highest-priority ones:
+
+Priority	Topic
+🔴🔴🔴	@BeforeMethod / @AfterMethod
+🔴🔴🔴	DataProvider
+🔴🔴🔴	Hard vs Soft Assertion
+🔴🔴🔴	Listeners / ITestListener
+🔴🔴🔴	Retry Analyzer
+🔴🔴🔴	testng.xml
+🔴🔴🔴	Parallel execution
+🔴🔴🔴	thread-count
+🔴🔴🔴	DataProvider parallel
+🔴🔴	Groups
+🔴🔴	dependsOnMethods
+🔴🔴	Parameters
+🔴🔴	Priority
+🔴🔴	Rerunning failures
+🔴🔴	Reporting
+⭐ The client-round questions I would especially expect
+
+Be ready to answer these without memorizing definitions:
+
+How do you design TestNG in your automation framework?
+How do you run tests in parallel?
+How do you make WebDriver thread-safe?
+How do you handle screenshots when a test fails?
+How do you implement retry logic?
+How do you rerun only failed tests?
+DataProvider vs Parameters?
+Hard assertion vs Soft assertion?
+How do you execute only smoke tests?
+How do you execute smoke + regression separately?
+How do you configure browser from testng.xml?
+What happens if a dependent test fails?
+How do you prevent retry from hiding real defects?
+How do you generate reports in CI/CD?
+How do you handle parallel execution with Selenium?
+What problems can occur during parallel execution?
+How does your listener capture screenshots?
+How would you design TestNG for 500+ regression tests?
+🔥 One architecture answer you should remember
+
+“In my framework, TestNG is responsible for test execution, lifecycle management, grouping, parameterization and parallel execution. I use @BeforeMethod and @AfterMethod for test-level setup and cleanup, DataProvider for data-driven scenarios, groups for smoke and regression execution, and listeners for logging, screenshots and reporting. For transient failures I use a controlled Retry Analyzer. Parallel execution is configured through testng.xml, and WebDriver is managed in a thread-safe way so that tests running on different threads don't share the same driver instance. The execution results are integrated with reporting and CI/CD.”
+
+That is the kind of answer that sounds much stronger than simply saying “TestNG is a testing framework.”
