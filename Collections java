@@ -1,0 +1,937 @@
+JAVA COLLECTIONS — INTERVIEW ANSWERS 🔴
+Questions 101–135
+101. What is Collection Framework?
+
+Answer:
+
+The Java Collection Framework is a set of interfaces, classes, and utility methods used to store and manipulate groups of objects.
+
+Main interfaces are:
+
+List
+Set
+Queue
+Map — technically part of the Collections Framework, but it does not extend Collection.
+
+Example:
+
+List<String> names = new ArrayList<>();
+
+names.add("John");
+names.add("David");
+names.add("John");
+
+System.out.println(names);
+
+Output:
+
+[John, David, John]
+
+Interview point: Collections are useful in automation when handling test data, web elements, API responses, configuration data, etc.
+
+102. Collection vs Collections?
+
+This is a very common interview question.
+
+Collection
+
+Collection is an interface.
+
+It is the root interface for interfaces such as:
+
+Collection
+   |
+   +-- List
+   +-- Set
+   +-- Queue
+
+Example:
+
+Collection<String> data = new ArrayList<>();
+Collections
+
+Collections is a utility class containing static methods.
+
+Examples:
+
+Collections.sort(list);
+Collections.reverse(list);
+Collections.shuffle(list);
+Collections.max(list);
+Collections.min(list);
+Short answer:
+
+Collection is an interface, whereas Collections is a utility class containing static methods for operating on collections.
+
+103. List vs Set vs Map?
+Feature	List	Set	Map
+Stores	Values	Values	Key-value pairs
+Duplicates	Allowed	Not allowed	Keys not allowed; values allowed
+Order	Usually maintains insertion order	Depends on implementation	Depends on implementation
+Index	Yes	No	No
+Example	ArrayList	HashSet	HashMap
+
+Example:
+
+List<String> list = new ArrayList<>();
+
+Set<String> set = new HashSet<>();
+
+Map<Integer, String> map = new HashMap<>();
+Interview answer:
+
+I use List when duplicates and ordering are required, Set when uniqueness is required, and Map when I need key-value based lookup.
+
+104. What is ArrayList?
+
+ArrayList is a resizable array implementation of List.
+
+ArrayList<String> names = new ArrayList<>();
+
+names.add("John");
+names.add("David");
+names.add("Alex");
+
+System.out.println(names.get(1));
+
+Output:
+
+David
+Features
+Allows duplicates
+Maintains insertion order
+Allows null
+Fast random access using index
+Not synchronized
+Internally uses a dynamically growing array
+When would you use it?
+
+I use ArrayList when I frequently access elements by index and don't have frequent insertions/deletions in the middle.
+
+105. What is LinkedList?
+
+LinkedList implements both:
+
+List
+Deque
+
+It is based on a doubly linked list.
+
+LinkedList<String> list = new LinkedList<>();
+
+list.add("A");
+list.add("B");
+list.addFirst("Start");
+list.addLast("End");
+
+System.out.println(list);
+
+Output:
+
+[Start, A, B, End]
+Advantages
+
+Insertion/removal at known positions can be efficient.
+
+Disadvantage
+
+Random access is slower than ArrayList.
+
+list.get(100);
+
+requires traversing nodes.
+
+106. What is Vector?
+
+Vector is a legacy synchronized List implementation.
+
+Vector<String> vector = new Vector<>();
+
+vector.add("Java");
+vector.add("Selenium");
+
+Important points:
+
+Maintains insertion order
+Allows duplicates
+Allows null
+Synchronized
+Legacy class
+Generally slower than ArrayList because of synchronization
+Interview answer:
+
+Vector is a legacy synchronized collection. In modern applications, I generally prefer ArrayList unless synchronization is specifically required.
+
+107. What is Stack?
+
+Stack is a legacy class that follows LIFO:
+
+Last In, First Out.
+
+Stack<Integer> stack = new Stack<>();
+
+stack.push(10);
+stack.push(20);
+stack.push(30);
+
+System.out.println(stack.pop());
+
+Output:
+
+30
+
+Common methods:
+
+push()
+pop()
+peek()
+empty()
+Modern alternative
+
+Deque / ArrayDeque is generally preferred for stack behavior.
+
+108. What is HashSet?
+
+HashSet stores unique elements.
+
+Set<String> set = new HashSet<>();
+
+set.add("Java");
+set.add("Selenium");
+set.add("Java");
+
+System.out.println(set);
+
+The duplicate "Java" is not stored.
+
+Features
+No duplicates
+Allows one null
+No guaranteed insertion order
+Uses hashing internally
+Fast average add, remove, and contains
+109. What is LinkedHashSet?
+
+LinkedHashSet is a HashSet that maintains insertion order.
+
+Set<String> set = new LinkedHashSet<>();
+
+set.add("C");
+set.add("A");
+set.add("B");
+
+System.out.println(set);
+
+Output:
+
+[C, A, B]
+Interview answer:
+
+If I need unique elements and also need to preserve insertion order, I use LinkedHashSet.
+
+110. What is TreeSet?
+
+TreeSet stores unique elements in sorted order.
+
+Set<Integer> numbers = new TreeSet<>();
+
+numbers.add(50);
+numbers.add(10);
+numbers.add(30);
+numbers.add(10);
+
+System.out.println(numbers);
+
+Output:
+
+[10, 30, 50]
+Features
+No duplicates
+Sorted order
+Generally implemented using a Red-Black tree
+Operations are typically O(log n)
+Does not allow null in the usual natural-order case
+111. What is HashMap?
+
+HashMap stores data in key-value pairs.
+
+Map<Integer, String> map = new HashMap<>();
+
+map.put(101, "John");
+map.put(102, "David");
+
+System.out.println(map.get(101));
+
+Output:
+
+John
+Features
+Keys must be unique
+Values can be duplicated
+Allows one null key
+Allows multiple null values
+No guaranteed iteration order
+Not synchronized
+
+Example:
+
+map.put(101, "John");
+map.put(101, "Alex");
+
+The second value replaces the first.
+
+112. What is LinkedHashMap?
+
+LinkedHashMap maintains insertion order of entries.
+
+Map<Integer, String> map = new LinkedHashMap<>();
+
+map.put(3, "C");
+map.put(1, "A");
+map.put(2, "B");
+
+System.out.println(map);
+
+Output:
+
+{3=C, 1=A, 2=B}
+Use case
+
+When I need HashMap-like key-value lookup but also need predictable insertion order, I use LinkedHashMap.
+
+113. What is TreeMap?
+
+TreeMap stores key-value pairs sorted by keys.
+
+Map<Integer, String> map = new TreeMap<>();
+
+map.put(30, "C");
+map.put(10, "A");
+map.put(20, "B");
+
+System.out.println(map);
+
+Output:
+
+{10=A, 20=B, 30=C}
+Important
+
+TreeMap sorts keys, not values.
+
+Typically:
+
+O(log n)
+
+for basic operations.
+
+114. What is Hashtable?
+
+Hashtable is a legacy synchronized Map implementation.
+
+Hashtable<Integer, String> table = new Hashtable<>();
+
+table.put(1, "Java");
+table.put(2, "Selenium");
+
+Important differences from HashMap:
+
+Synchronized
+Does not allow null key
+Does not allow null values
+Legacy
+Generally slower than HashMap in non-concurrent use
+115. ArrayList vs LinkedList?
+ArrayList	LinkedList
+Dynamic array	Doubly linked list
+Fast random access	Slower random access
+get(index) fast	get(index) slower
+Insert/delete in middle can require shifting	Node insertion/removal can be efficient when position/node is known
+Usually preferred	Useful for deque/list operations
+Interview answer:
+
+If my application frequently reads elements by index, I prefer ArrayList. If I frequently perform insertions/removals and need linked-list/deque behavior, LinkedList can be appropriate.
+
+116. HashSet vs TreeSet?
+HashSet	TreeSet
+No duplicates	No duplicates
+No guaranteed ordering	Sorted order
+Hash-based	Tree-based
+Average O(1) basic operations	O(log n)
+Faster generally	Slower but sorted
+Example:
+HashSet<Integer> h = new HashSet<>();
+TreeSet<Integer> t = new TreeSet<>();
+
+Use HashSet for uniqueness.
+
+Use TreeSet when uniqueness + sorting is required.
+
+117. HashMap vs Hashtable?
+HashMap	Hashtable
+Not synchronized	Synchronized
+Allows one null key	Does not allow null key
+Allows null values	Does not allow null values
+Modern	Legacy
+Generally faster	Generally slower
+Interview answer:
+
+I normally prefer HashMap. If thread-safe map operations are required, I would consider modern concurrent collections such as ConcurrentHashMap rather than choosing Hashtable for new code.
+
+118. HashMap vs TreeMap?
+HashMap	TreeMap
+No guaranteed order	Sorted by keys
+Hash-based	Tree-based
+Average O(1) basic operations	O(log n)
+Allows null key	Null key generally not allowed with natural ordering
+Faster for lookup generally	Useful when sorted keys are required
+119. List vs Set?
+List
+
+Allows duplicates.
+
+List<Integer> list = new ArrayList<>();
+
+list.add(10);
+list.add(10);
+
+Result:
+
+[10, 10]
+Set
+
+Does not allow duplicates.
+
+Set<Integer> set = new HashSet<>();
+
+set.add(10);
+set.add(10);
+
+Result:
+
+[10]
+Interview answer:
+
+I use List when duplicate values or index-based access are required. I use Set when uniqueness is important.
+
+120. How does HashMap work internally? 🔴 VERY IMPORTANT
+
+This is a high-priority SDET interview question.
+
+When you execute:
+
+map.put("Java", 100);
+
+HashMap roughly performs these steps:
+
+Step 1 — Calculate hash
+
+HashMap obtains the key's hash value.
+
+"Java" → hash
+Step 2 — Determine bucket
+
+The hash is used to determine the bucket/index where the entry should be stored.
+
+Step 3 — Check the bucket
+
+If the bucket is empty:
+
+store entry
+
+If entries already exist:
+
+compare hash
+        ↓
+compare keys using equals()
+Step 4 — Collision handling
+
+If different keys map to the same bucket, HashMap handles the collision using its bucket structure.
+
+In modern Java, heavily populated buckets can be treeified under the required conditions, improving worst-case lookup behavior compared with a long linked chain.
+
+Step 5 — Retrieve
+
+For:
+
+map.get("Java");
+
+HashMap calculates the hash again, locates the bucket, and checks the candidate entries using hash/key comparisons.
+
+Strong interview answer:
+
+HashMap stores key-value pairs using hashing. During put, it calculates the key's hash, determines a bucket, and stores the entry there. During get, it calculates the hash again and searches the corresponding bucket. If multiple keys map to the same bucket, collision handling is performed using the bucket's internal structure. equals() is used to identify the exact key.
+
+121. What happens when two keys have the same hash?
+
+Suppose:
+
+key1.hashCode() == key2.hashCode()
+
+This does not necessarily mean the keys are equal.
+
+They can go to the same bucket.
+
+HashMap then uses equality comparison to determine whether they represent the same key.
+
+Conceptually:
+
+Same hash
+   ↓
+Same bucket
+   ↓
+equals()
+   ↓
+Same key? → replace value
+Different key? → store another entry
+122. What is collision?
+
+A collision occurs when two different keys produce the same bucket/index during hashing.
+
+Example conceptually:
+
+Key A → bucket 5
+Key B → bucket 5
+
+Both need to be stored in the same bucket.
+
+HashMap handles this through its internal bucket structure.
+
+Interview answer:
+
+A hash collision occurs when different keys map to the same bucket. HashMap handles the collision internally and uses key equality to distinguish the entries.
+
+123. What is load factor?
+
+Load factor determines when a HashMap should resize its internal table as it grows.
+
+Default load factor is:
+
+0.75
+
+For example, conceptually:
+
+capacity = 16
+load factor = 0.75
+
+threshold = 16 × 0.75
+          = 12
+
+When the map grows beyond its threshold, it resizes.
+
+Interview answer:
+
+Load factor controls how full a HashMap can become before resizing. The default load factor is 0.75.
+
+124. Default HashMap capacity?
+
+The commonly cited default initial capacity is:
+
+16
+
+and default load factor is:
+
+0.75
+
+Important interview nuance: HashMap uses lazy initialization in modern Java, so the internal table is not necessarily allocated at the exact moment you execute:
+
+new HashMap<>();
+
+The table is initialized when needed.
+
+125. Can HashMap contain null?
+
+Yes.
+
+HashMap allows:
+
+one null key
+multiple null values
+
+Example:
+
+Map<Integer, String> map = new HashMap<>();
+
+map.put(null, "Java");
+map.put(1, null);
+map.put(2, null);
+
+Valid.
+
+126. Can HashSet contain duplicates?
+
+No.
+
+Set<String> set = new HashSet<>();
+
+set.add("Java");
+set.add("Java");
+
+Only one "Java" is stored.
+
+127. How does HashSet identify duplicates?
+
+This is another very important question.
+
+HashSet internally uses a HashMap.
+
+Conceptually:
+
+HashSet element
+      ↓
+HashMap key
+      ↓
+hashCode()
+      ↓
+equals()
+
+When adding an object:
+
+set.add(object);
+
+Java uses:
+
+hashCode()
+equals()
+
+to determine whether an equivalent element already exists.
+
+Important interview point
+
+If you create your own class and override equals(), you should generally override hashCode() consistently.
+
+class Employee {
+
+    int id;
+
+    @Override
+    public int hashCode() {
+        return Integer.hashCode(id);
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        // equality logic
+        return true;
+    }
+}
+Interview answer:
+
+HashSet uses hashCode() to locate the appropriate bucket and equals() to determine whether an equivalent element already exists.
+
+128. What is Iterator?
+
+Iterator is used to traverse collection elements one by one.
+
+List<String> list = new ArrayList<>();
+
+list.add("Java");
+list.add("Selenium");
+list.add("API");
+
+Iterator<String> iterator = list.iterator();
+
+while (iterator.hasNext()) {
+    System.out.println(iterator.next());
+}
+
+Methods:
+
+hasNext()
+next()
+remove()
+Important
+
+Iterator provides a standard way to traverse collections.
+
+129. Iterator vs ListIterator?
+Iterator	ListIterator
+Works with Collection	Specifically for List
+Forward traversal	Forward + backward
+hasNext()	hasNext()
+next()	next()
+No previous()	Has previous()
+Limited modification	Can add/set/remove elements
+
+Example:
+
+ListIterator<String> it = list.listIterator();
+
+while (it.hasNext()) {
+    System.out.println(it.next());
+}
+
+while (it.hasPrevious()) {
+    System.out.println(it.previous());
+}
+130. Comparable vs Comparator? 🔴
+Comparable
+
+Used for natural/default ordering.
+
+Class implements:
+
+Comparable<T>
+
+and overrides:
+
+compareTo()
+
+Example:
+
+class Employee implements Comparable<Employee> {
+
+    int salary;
+
+    @Override
+    public int compareTo(Employee e) {
+        return this.salary - e.salary;
+    }
+}
+Comparator
+
+Used when you want custom/external sorting logic.
+
+Comparator<Employee> bySalary =
+    (e1, e2) -> Integer.compare(e1.salary, e2.salary);
+Difference
+Comparable	Comparator
+compareTo()	compare()
+Defined inside class	Separate comparison logic
+Natural ordering	Custom ordering
+Usually one primary natural ordering	Can create multiple sorting strategies
+Interview answer:
+
+Comparable is used when the class itself defines its natural ordering. Comparator is used when I want separate or multiple custom sorting strategies.
+
+131. How do you sort ArrayList?
+Method 1 — Collections.sort()
+List<Integer> numbers = new ArrayList<>();
+
+numbers.add(30);
+numbers.add(10);
+numbers.add(20);
+
+Collections.sort(numbers);
+
+System.out.println(numbers);
+
+Output:
+
+[10, 20, 30]
+Method 2 — sort()
+numbers.sort(Integer::compareTo);
+Descending:
+numbers.sort(Collections.reverseOrder());
+132. How do you remove duplicates from ArrayList?
+Simple solution
+List<String> list = new ArrayList<>();
+
+list.add("Java");
+list.add("Selenium");
+list.add("Java");
+
+List<String> unique =
+        new ArrayList<>(new LinkedHashSet<>(list));
+
+System.out.println(unique);
+
+Output:
+
+[Java, Selenium]
+Why LinkedHashSet?
+
+Because it:
+
+removes duplicates
+preserves insertion order
+If order doesn't matter:
+List<String> unique =
+        new ArrayList<>(new HashSet<>(list));
+133. How do you convert List to Set?
+List<String> list =
+        Arrays.asList("Java", "Selenium", "Java");
+
+Set<String> set = new HashSet<>(list);
+
+If you want to preserve insertion order:
+
+Set<String> set = new LinkedHashSet<>(list);
+134. How do you iterate Map?
+Method 1 — entrySet() ⭐ Preferred
+Map<Integer, String> map = new HashMap<>();
+
+map.put(1, "Java");
+map.put(2, "Selenium");
+
+for (Map.Entry<Integer, String> entry : map.entrySet()) {
+
+    System.out.println(
+        entry.getKey() + " = " + entry.getValue()
+    );
+}
+Method 2 — keySet()
+for (Integer key : map.keySet()) {
+    System.out.println(key + " = " + map.get(key));
+}
+Method 3 — forEach()
+map.forEach((key, value) ->
+    System.out.println(key + " = " + value)
+);
+Interview answer:
+
+If I need both key and value, I prefer entrySet() because it directly gives me both.
+
+135. How do you find duplicate values using HashMap? 🔴
+
+Very common coding question.
+
+Suppose:
+
+String[] names = {
+    "Java",
+    "Selenium",
+    "Java",
+    "API",
+    "Selenium"
+};
+
+We can maintain a frequency map.
+
+Map<String, Integer> frequency = new HashMap<>();
+
+for (String name : names) {
+
+    frequency.put(
+        name,
+        frequency.getOrDefault(name, 0) + 1
+    );
+}
+
+for (Map.Entry<String, Integer> entry : frequency.entrySet()) {
+
+    if (entry.getValue() > 1) {
+        System.out.println(entry.getKey());
+    }
+}
+
+Output:
+
+Java
+Selenium
+How it works
+
+First occurrence:
+
+Java → 1
+
+Second occurrence:
+
+Java → 2
+
+Then:
+
+if (value > 1)
+
+means it is duplicated.
+
+🔥 COLLECTIONS — MUST KNOW FOR SDET INTERVIEW
+
+For your Java + Selenium + TestNG interviews, I would prioritize these:
+
+🔴 Tier 1 — Must be able to explain deeply
+ArrayList
+HashSet
+HashMap
+List vs Set vs Map
+ArrayList vs LinkedList
+HashSet vs TreeSet
+HashMap vs Hashtable
+HashMap vs TreeMap
+How HashMap works internally
+Hash collision
+hashCode() vs equals()
+How HashSet identifies duplicates
+Comparable vs Comparator
+Iterator vs ListIterator
+Remove duplicates
+Find duplicates using HashMap
+Iterate HashMap
+🟠 Tier 2
+LinkedHashSet
+LinkedHashMap
+TreeSet
+TreeMap
+Vector
+Stack
+Load factor
+HashMap capacity
+Null handling
+🔥 SDET REAL-TIME QUESTIONS THEY CAN ASK
+
+Don't stop at definitions. A 2nd-round interviewer can turn these into scenarios:
+
+Q1. You receive 500 employee IDs from an API. How do you check duplicates?
+
+Answer: Use a HashSet.
+
+Set<String> uniqueIds = new HashSet<>();
+
+for (String id : ids) {
+    if (!uniqueIds.add(id)) {
+        System.out.println("Duplicate: " + id);
+    }
+}
+
+Q2. You need to maintain employee ID → employee name. Which collection?
+
+Map<Integer, String> employees = new HashMap<>();
+
+Q3. You need unique values but want original insertion order.
+
+LinkedHashSet
+
+Q4. You need unique values in sorted order.
+
+TreeSet
+
+Q5. You need key-value pairs sorted by key.
+
+TreeMap
+
+Q6. You need key-value pairs while preserving insertion order.
+
+LinkedHashMap
+
+Q7. You need to count occurrences of API response values.
+
+Map<String, Integer> count = new HashMap<>();
+
+Q8. You have a List of web-element texts and want unique values.
+
+Set<String> uniqueTexts =
+        new LinkedHashSet<>(texts);
+
+Q9. You need to sort employee objects by salary.
+
+Use:
+
+Comparator<Employee>
+
+Q10. Why would you choose HashMap instead of ArrayList?
+
+When I need key-based lookup rather than index-based access.
+
+⭐ One line to remember for interviews
+LIST → duplicates + index
+SET  → unique values
+MAP  → key + value
+
+HashSet      → unique, no guaranteed order
+LinkedHashSet → unique + insertion order
+TreeSet      → unique + sorted
+
+HashMap       → key/value, no guaranteed order
+LinkedHashMap → key/value + insertion order
+TreeMap       → key/value + sorted keys
+
+These 35 questions are enough to cover the core Collections portion, but for a real SDET 2nd/client round, the most important next step is to practice the Collections coding problems—especially frequency counting, duplicates, sorting objects, converting collections, HashMap problems, and ArrayList/Set scenarios.
