@@ -1,0 +1,985 @@
+Absolutely. For SDET / QA Automation interviews, don't just memorize definitions for these—you should be able to write the code and explain it line-by-line.
+
+Below is the Java + Selenium + TestNG interview-ready coding set. I’ll use modern Selenium 4 style and keep the code practical.
+
+20. SELENIUM CODING 🔴
+338. Launch browser
+Interview code
+import org.openqa.selenium.WebDriver;
+import org.openqa.selenium.chrome.ChromeDriver;
+
+public class LaunchBrowser {
+
+    public static void main(String[] args) {
+
+        WebDriver driver = new ChromeDriver();
+
+        driver.manage().window().maximize();
+
+        driver.quit();
+    }
+}
+Interview explanation
+
+"I create a ChromeDriver instance, maximize the browser window and use quit() at the end to close the complete browser session."
+
+Important: Selenium Manager can automatically manage the driver in modern Selenium versions, so System.setProperty() is usually not required.
+
+339. Open URL
+WebDriver driver = new ChromeDriver();
+
+driver.manage().window().maximize();
+
+driver.get("https://example.com");
+
+System.out.println(driver.getTitle());
+
+driver.quit();
+get() vs navigate().to()
+driver.get("https://example.com");
+
+driver.navigate().to("https://example.com");
+
+Both can navigate to a URL.
+
+340. Locate element
+By ID
+WebElement username = driver.findElement(By.id("username"));
+By XPath
+WebElement username =
+        driver.findElement(By.xpath("//input[@name='username']"));
+By CSS
+WebElement username =
+        driver.findElement(By.cssSelector("#username"));
+Complete example
+WebElement username = driver.findElement(By.id("username"));
+
+username.sendKeys("admin");
+341. Enter username/password
+driver.findElement(By.id("username"))
+      .sendKeys("admin");
+
+driver.findElement(By.id("password"))
+      .sendKeys("Password123");
+
+Or:
+
+WebElement username = driver.findElement(By.id("username"));
+WebElement password = driver.findElement(By.id("password"));
+
+username.clear();
+username.sendKeys("admin");
+
+password.clear();
+password.sendKeys("Password123");
+Interview point
+
+Use clear() before sendKeys() if the field may already contain data.
+
+342. Click login
+driver.findElement(By.id("loginButton")).click();
+
+Better in a framework:
+
+WebElement loginButton =
+        driver.findElement(By.xpath("//button[@type='submit']"));
+
+loginButton.click();
+343. Explicit wait 🔴
+
+This is very important.
+
+WebDriverWait wait = new WebDriverWait(
+        driver,
+        Duration.ofSeconds(10)
+);
+
+WebElement loginButton = wait.until(
+        ExpectedConditions.elementToBeClickable(
+                By.id("loginButton")
+        )
+);
+
+loginButton.click();
+Common conditions
+ExpectedConditions.visibilityOfElementLocated(locator);
+
+ExpectedConditions.elementToBeClickable(locator);
+
+ExpectedConditions.presenceOfElementLocated(locator);
+
+ExpectedConditions.urlContains("dashboard");
+
+ExpectedConditions.titleContains("Dashboard");
+
+ExpectedConditions.invisibilityOfElementLocated(locator);
+Interview answer
+
+"I prefer explicit waits because they wait only for the required condition and don't unnecessarily slow down the entire test."
+
+344. Fluent wait 🔴
+Wait<WebDriver> wait = new FluentWait<>(driver)
+        .withTimeout(Duration.ofSeconds(30))
+        .pollingEvery(Duration.ofSeconds(2))
+        .ignoring(NoSuchElementException.class);
+
+WebElement element = wait.until(
+        driver -> driver.findElement(By.id("username"))
+);
+What is special about FluentWait?
+
+You control:
+
+maximum timeout
+polling interval
+exceptions to ignore
+
+Example:
+
+Maximum wait = 30 seconds
+Check every = 2 seconds
+Ignore = NoSuchElementException
+345. Dynamic XPath 🔴
+
+Suppose the ID changes:
+
+user_12345
+user_67890
+user_98765
+
+Don't use:
+
+By.id("user_12345");
+
+Use:
+
+By.xpath("//input[contains(@id,'user_')]");
+starts-with()
+By.xpath("//input[starts-with(@id,'user_')]");
+Multiple attributes
+By.xpath("//input[@type='text' and @name='username']");
+Text
+By.xpath("//button[text()='Login']");
+Normalize space
+
+Useful when HTML contains unwanted spaces:
+
+By.xpath("//button[normalize-space()='Login']");
+346. Calendar 🔴
+
+Suppose a date picker requires selecting:
+
+September 20, 2026
+
+A common approach is to navigate month/year and select the day.
+
+Basic example
+driver.findElement(By.id("datePicker")).click();
+
+while (true) {
+
+    String month = driver.findElement(
+            By.cssSelector(".calendar-month")
+    ).getText();
+
+    if (month.equals("September 2026")) {
+        break;
+    }
+
+    driver.findElement(
+            By.xpath("//button[@aria-label='Next month']")
+    ).click();
+}
+
+driver.findElement(
+        By.xpath("//button[normalize-space()='20']")
+).click();
+Interview explanation
+
+"For a dynamic calendar, I first compare the displayed month and year with the target month and year. If they don't match, I navigate using the next or previous month button and finally select the required day."
+
+Important
+
+Don't blindly locate:
+
+//button[text()='20']
+
+because multiple 20 elements may exist from previous/next month.
+
+347. Window switching 🔴
+
+Suppose clicking a link opens a new tab.
+
+String parentWindow = driver.getWindowHandle();
+
+driver.findElement(By.id("newTab")).click();
+
+Set<String> windows = driver.getWindowHandles();
+
+for (String window : windows) {
+
+    if (!window.equals(parentWindow)) {
+
+        driver.switchTo().window(window);
+        break;
+    }
+}
+Switch back
+driver.switchTo().window(parentWindow);
+Interview point
+getWindowHandle()
+
+returns current window.
+
+getWindowHandles()
+
+returns all window handles.
+
+348. iframe 🔴
+Switch by index
+driver.switchTo().frame(0);
+Switch by name/id
+driver.switchTo().frame("paymentFrame");
+Switch using WebElement
+WebElement frame =
+        driver.findElement(By.id("paymentFrame"));
+
+driver.switchTo().frame(frame);
+Return to main page
+driver.switchTo().defaultContent();
+Go to parent frame
+driver.switchTo().parentFrame();
+Interview scenario
+
+"If the element exists inside an iframe, I first switch into the iframe, interact with the element, and then switch back using defaultContent()."
+
+349. Alert 🔴
+Accept
+Alert alert = driver.switchTo().alert();
+
+alert.accept();
+Cancel
+alert.dismiss();
+Get text
+String message = alert.getText();
+
+System.out.println(message);
+Enter text
+alert.sendKeys("Test");
+
+alert.accept();
+Complete
+Alert alert = driver.switchTo().alert();
+
+System.out.println(alert.getText());
+
+alert.accept();
+350. Dropdown 🔴
+
+For a standard HTML <select>:
+
+Select select = new Select(
+        driver.findElement(By.id("country"))
+);
+By visible text
+select.selectByVisibleText("India");
+By value
+select.selectByValue("IN");
+By index
+select.selectByIndex(2);
+Get selected option
+System.out.println(
+        select.getFirstSelectedOption().getText()
+);
+Important interview point
+
+Select works only with actual HTML <select> elements.
+
+For custom dropdowns, use normal Selenium locators.
+
+351. Mouse hover 🔴
+Actions actions = new Actions(driver);
+
+WebElement menu =
+        driver.findElement(By.id("products"));
+
+actions.moveToElement(menu).perform();
+Hover + click
+actions
+        .moveToElement(menu)
+        .click()
+        .perform();
+352. Drag and drop 🔴
+Actions actions = new Actions(driver);
+
+WebElement source =
+        driver.findElement(By.id("source"));
+
+WebElement target =
+        driver.findElement(By.id("target"));
+
+actions
+        .dragAndDrop(source, target)
+        .perform();
+Alternative
+actions
+        .clickAndHold(source)
+        .moveToElement(target)
+        .release()
+        .perform();
+
+The second approach can be useful when normal dragAndDrop() doesn't work because of the application's implementation.
+
+353. Keyboard action 🔴
+Actions actions = new Actions(driver);
+
+actions
+        .keyDown(Keys.CONTROL)
+        .sendKeys("a")
+        .keyUp(Keys.CONTROL)
+        .perform();
+CTRL + C
+actions
+        .keyDown(Keys.CONTROL)
+        .sendKeys("c")
+        .keyUp(Keys.CONTROL)
+        .perform();
+CTRL + V
+actions
+        .keyDown(Keys.CONTROL)
+        .sendKeys("v")
+        .keyUp(Keys.CONTROL)
+        .perform();
+ENTER
+actions.sendKeys(Keys.ENTER).perform();
+354. Screenshot 🔴
+TakesScreenshot screenshot =
+        (TakesScreenshot) driver;
+
+File source =
+        screenshot.getScreenshotAs(OutputType.FILE);
+
+File destination =
+        new File("screenshots/homepage.png");
+
+Files.copy(
+        source.toPath(),
+        destination.toPath(),
+        StandardCopyOption.REPLACE_EXISTING
+);
+
+Imports:
+
+import org.openqa.selenium.*;
+import java.io.File;
+import java.nio.file.Files;
+import java.nio.file.StandardCopyOption;
+Interview explanation
+
+"I use TakesScreenshot and save the screenshot to the required location. In a framework, I normally trigger screenshot capture automatically through a TestNG listener when a test fails."
+
+355. Scroll 🔴
+JavaScriptExecutor
+JavascriptExecutor js =
+        (JavascriptExecutor) driver;
+
+js.executeScript("window.scrollBy(0,500)");
+Scroll to bottom
+js.executeScript(
+        "window.scrollTo(0, document.body.scrollHeight)"
+);
+Scroll to element
+WebElement element =
+        driver.findElement(By.id("footer"));
+
+js.executeScript(
+        "arguments[0].scrollIntoView(true);",
+        element
+);
+Selenium 4 alternative
+new Actions(driver)
+        .scrollToElement(element)
+        .perform();
+356. JavaScript click 🔴
+JavascriptExecutor js =
+        (JavascriptExecutor) driver;
+
+WebElement button =
+        driver.findElement(By.id("submit"));
+
+js.executeScript(
+        "arguments[0].click();",
+        button
+);
+Interview warning
+
+Don't use JavaScript click as the first choice.
+
+Prefer:
+
+button.click();
+
+If normal Selenium click fails because of overlays, special application behavior, etc., investigate the root cause first and use JS when appropriate.
+
+357. Get all links 🔴
+List<WebElement> links =
+        driver.findElements(By.tagName("a"));
+
+for (WebElement link : links) {
+
+    System.out.println(link.getText());
+
+    System.out.println(link.getAttribute("href"));
+}
+Count links
+System.out.println("Total links: " + links.size());
+358. Broken links 🔴🔴
+
+This is a very common coding interview question.
+
+List<WebElement> links =
+        driver.findElements(By.tagName("a"));
+
+for (WebElement link : links) {
+
+    String url = link.getAttribute("href");
+
+    if (url == null || url.isBlank()) {
+        continue;
+    }
+
+    HttpURLConnection connection =
+            (HttpURLConnection)
+                    new URL(url).openConnection();
+
+    connection.setRequestMethod("HEAD");
+
+    connection.connect();
+
+    int statusCode =
+            connection.getResponseCode();
+
+    if (statusCode >= 400) {
+
+        System.out.println(
+                "Broken: " + url +
+                " --> " + statusCode
+        );
+
+    } else {
+
+        System.out.println(
+                "Valid: " + url +
+                " --> " + statusCode
+        );
+    }
+}
+Interview explanation
+
+"I collect all anchor elements, extract their href values, send an HTTP request to each URL and validate the response status code. Generally, 400 and above indicate an unsuccessful response, though the exact handling can depend on the application."
+
+359. Web table 🔴
+
+Suppose:
+
+Name       Salary
+John       50000
+David      70000
+Mike       40000
+Print all rows
+List<WebElement> rows =
+        driver.findElements(
+                By.xpath("//table[@id='employeeTable']//tbody/tr")
+        );
+
+for (WebElement row : rows) {
+
+    System.out.println(row.getText());
+}
+Print cells
+for (WebElement row : rows) {
+
+    List<WebElement> cells =
+            row.findElements(By.tagName("td"));
+
+    for (WebElement cell : cells) {
+
+        System.out.print(cell.getText() + " ");
+    }
+
+    System.out.println();
+}
+360. Find negative values in table 🔴🔴
+
+Example:
+
+Account       Amount
+A001          500
+A002         -200
+A003          300
+A004         -150
+Code
+List<WebElement> rows =
+        driver.findElements(
+                By.xpath("//table[@id='transactionTable']//tbody/tr")
+        );
+
+for (WebElement row : rows) {
+
+    List<WebElement> cells =
+            row.findElements(By.tagName("td"));
+
+    String amountText = cells.get(1).getText();
+
+    double amount =
+            Double.parseDouble(amountText);
+
+    if (amount < 0) {
+
+        System.out.println(
+                "Negative value: " + amount
+        );
+    }
+}
+Better interview answer
+
+"I identify the amount column, convert its text into a numeric value and check whether it is less than zero."
+
+361. Pagination 🔴🔴
+
+Suppose every page contains a table.
+
+while (true) {
+
+    List<WebElement> rows =
+            driver.findElements(
+                    By.xpath("//table[@id='data']//tbody/tr")
+            );
+
+    for (WebElement row : rows) {
+        System.out.println(row.getText());
+    }
+
+    WebElement next =
+            driver.findElement(
+                    By.xpath("//button[@aria-label='Next']")
+            );
+
+    if (!next.isEnabled()) {
+        break;
+    }
+
+    next.click();
+
+    new WebDriverWait(driver, Duration.ofSeconds(10))
+            .until(ExpectedConditions.stalenessOf(rows.get(0)));
+}
+Interview concept
+
+You should explain:
+
+Read current page
+      ↓
+Process rows
+      ↓
+Check Next button
+      ↓
+If enabled → click
+      ↓
+Wait for next page
+      ↓
+Repeat
+      ↓
+Stop when Next disabled
+362. Checkbox selection
+WebElement checkbox =
+        driver.findElement(By.id("terms"));
+
+if (!checkbox.isSelected()) {
+
+    checkbox.click();
+}
+Verify
+Assert.assertTrue(checkbox.isSelected());
+363. Select all checkboxes 🔴
+List<WebElement> checkboxes =
+        driver.findElements(
+                By.xpath("//input[@type='checkbox']")
+        );
+
+for (WebElement checkbox : checkboxes) {
+
+    if (!checkbox.isSelected()) {
+
+        checkbox.click();
+    }
+}
+Interview point
+
+Don't blindly click every checkbox because some may already be selected.
+
+364. File upload 🔴
+
+If the application uses:
+
+<input type="file">
+
+Use:
+
+WebElement upload =
+        driver.findElement(By.id("fileUpload"));
+
+upload.sendKeys(
+        "C:\\Users\\Test\\Documents\\sample.pdf"
+);
+Important
+
+You normally don't need to interact with the OS file dialog.
+
+Selenium can send the file path directly to an <input type="file">.
+
+365. File download validation 🔴
+
+A practical approach:
+
+Path downloadPath =
+        Paths.get("C:\\Downloads");
+
+driver.findElement(By.id("download"))
+      .click();
+
+WebDriverWait wait =
+        new WebDriverWait(driver, Duration.ofSeconds(20));
+
+Path downloadedFile = wait.until(driver -> {
+
+    try (Stream<Path> files =
+                 Files.list(downloadPath)) {
+
+        return files
+                .filter(path ->
+                        path.getFileName()
+                                .toString()
+                                .equals("report.pdf"))
+                .findFirst()
+                .orElse(null);
+
+    } catch (IOException e) {
+        return null;
+    }
+});
+
+Then:
+
+Assert.assertNotNull(downloadedFile);
+
+Assert.assertTrue(
+        Files.exists(downloadedFile)
+);
+Also validate file size
+Assert.assertTrue(
+        Files.size(downloadedFile) > 0
+);
+Interview answer
+
+"I configure the browser download directory, trigger the download, wait until the expected file appears, then verify its existence and optionally validate file size, extension or contents."
+
+366. Capture screenshot on failure 🔴🔴
+
+This should ideally be done through a TestNG listener, not duplicated in every test.
+
+ITestListener
+public class TestListener implements ITestListener {
+
+    @Override
+    public void onTestFailure(ITestResult result) {
+
+        WebDriver driver =
+                DriverFactory.getDriver();
+
+        TakesScreenshot screenshot =
+                (TakesScreenshot) driver;
+
+        File source =
+                screenshot.getScreenshotAs(
+                        OutputType.FILE
+                );
+
+        File destination =
+                new File(
+                    "screenshots/"
+                    + result.getName()
+                    + ".png"
+                );
+
+        try {
+            Files.copy(
+                    source.toPath(),
+                    destination.toPath(),
+                    StandardCopyOption.REPLACE_EXISTING
+            );
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+}
+Connect listener
+@Listeners(TestListener.class)
+public class LoginTest {
+    
+}
+Strong interview explanation
+
+"I don't put screenshot code inside every test. I use a TestNG listener and capture screenshots centrally whenever onTestFailure() is triggered."
+
+367. Retry failed test 🔴🔴
+
+Use IRetryAnalyzer.
+
+public class RetryAnalyzer
+        implements IRetryAnalyzer {
+
+    private int count = 0;
+
+    private final int maxRetry = 2;
+
+    @Override
+    public boolean retry(ITestResult result) {
+
+        if (count < maxRetry) {
+
+            count++;
+
+            return true;
+        }
+
+        return false;
+    }
+}
+
+Then:
+
+@Test(retryAnalyzer = RetryAnalyzer.class)
+public void loginTest() {
+
+    // test steps
+}
+Interview warning
+
+Retry should not hide real defects.
+
+Strong answer:
+
+"I use retry mainly for known transient issues such as temporary environment or network instability. I don't use it to mask genuine application failures."
+
+368. Headless browser 🔴
+ChromeOptions
+ChromeOptions options =
+        new ChromeOptions();
+
+options.addArguments("--headless=new");
+
+WebDriver driver =
+        new ChromeDriver(options);
+Other useful options
+options.addArguments("--window-size=1920,1080");
+Interview answer
+
+"Headless execution runs the browser without displaying the UI. It's useful for CI/CD environments and can reduce resource consumption."
+
+369. Multiple browser execution 🔴
+
+A simple cross-browser setup:
+
+String browser = "chrome";
+
+WebDriver driver;
+
+if (browser.equalsIgnoreCase("chrome")) {
+
+    driver = new ChromeDriver();
+
+} else if (browser.equalsIgnoreCase("firefox")) {
+
+    driver = new FirefoxDriver();
+
+} else if (browser.equalsIgnoreCase("edge")) {
+
+    driver = new EdgeDriver();
+
+} else {
+
+    throw new IllegalArgumentException(
+            "Unsupported browser: " + browser
+    );
+}
+Better framework approach
+
+Use a DriverFactory:
+
+public static WebDriver createDriver(String browser) {
+
+    switch (browser.toLowerCase()) {
+
+        case "chrome":
+            return new ChromeDriver();
+
+        case "firefox":
+            return new FirefoxDriver();
+
+        case "edge":
+            return new EdgeDriver();
+
+        default:
+            throw new IllegalArgumentException(
+                    "Invalid browser: " + browser
+            );
+    }
+}
+
+Then:
+
+WebDriver driver =
+        DriverFactory.createDriver("chrome");
+370. Parallel execution 🔴🔴🔴
+
+This is extremely important for an SDET interview.
+
+TestNG XML
+<suite name="Regression" parallel="tests" thread-count="3">
+
+    <test name="Chrome">
+        <parameter name="browser" value="chrome"/>
+        <classes>
+            <class name="tests.LoginTest"/>
+        </classes>
+    </test>
+
+    <test name="Firefox">
+        <parameter name="browser" value="firefox"/>
+        <classes>
+            <class name="tests.LoginTest"/>
+        </classes>
+    </test>
+
+    <test name="Edge">
+        <parameter name="browser" value="edge"/>
+        <classes>
+            <class name="tests.LoginTest"/>
+        </classes>
+    </test>
+
+</suite>
+Test class
+@Parameters("browser")
+@BeforeMethod
+public void setup(String browser) {
+
+    driver = DriverFactory.createDriver(browser);
+
+    driver.manage().window().maximize();
+}
+🔥 Most important concept: ThreadLocal
+
+If you're asked:
+
+"How do you make Selenium WebDriver thread-safe for parallel execution?"
+
+A strong answer is:
+
+public class DriverFactory {
+
+    private static ThreadLocal<WebDriver>
+            driver = new ThreadLocal<>();
+
+    public static void setDriver(WebDriver webDriver) {
+
+        driver.set(webDriver);
+    }
+
+    public static WebDriver getDriver() {
+
+        return driver.get();
+    }
+
+    public static void unload() {
+
+        driver.get().quit();
+
+        driver.remove();
+    }
+}
+
+Each parallel thread gets its own WebDriver instance.
+
+Conceptually:
+
+Thread 1 ───── ChromeDriver 1
+Thread 2 ───── ChromeDriver 2
+Thread 3 ───── ChromeDriver 3
+Thread 4 ───── ChromeDriver 4
+
+Not:
+
+Thread 1 ─┐
+Thread 2 ─┼──> SAME WebDriver ❌
+Thread 3 ─┘
+🚨 THE 15 CODING QUESTIONS I WOULD PRIORITIZE
+
+For your SDET / QA Automation interviews, don't give equal preparation time to all 33.
+
+Master these first:
+
+Priority	Coding problem
+🔴🔴🔴	Explicit wait
+🔴🔴🔴	Dynamic XPath
+🔴🔴🔴	Window switching
+🔴🔴🔴	iframe
+🔴🔴🔴	Calendar
+🔴🔴🔴	Web table
+🔴🔴🔴	Pagination
+🔴🔴🔴	Negative values in table
+🔴🔴🔴	Screenshot
+🔴🔴🔴	Screenshot on failure
+🔴🔴🔴	Retry failed test
+🔴🔴🔴	DriverFactory
+🔴🔴🔴	Multiple browser
+🔴🔴🔴	Parallel execution
+🔴🔴🔴	ThreadLocal WebDriver
+⭐ Especially memorize this interview pattern
+
+When an interviewer gives you a real-time Selenium problem, answer in this order:
+
+1. Identify the element
+        ↓
+2. Choose a stable locator
+        ↓
+3. Add appropriate wait
+        ↓
+4. Perform the action
+        ↓
+5. Validate the result
+        ↓
+6. Handle exception if required
+        ↓
+7. Capture evidence if failure occurs
+
+For example, don't simply say:
+
+driver.findElement(...).click();
+
+A stronger SDET-level approach is:
+
+WebDriverWait wait =
+        new WebDriverWait(driver, Duration.ofSeconds(10));
+
+WebElement loginButton =
+        wait.until(
+            ExpectedConditions.elementToBeClickable(
+                By.id("loginButton")
+            )
+        );
+
+loginButton.click();
+
+That demonstrates locator + synchronization + action, rather than just knowing Selenium syntax.
