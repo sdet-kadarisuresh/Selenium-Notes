@@ -1,0 +1,613 @@
+22. TESTNG REAL-TIME 🔴
+409. 500 tests need parallel execution. How?
+Interview answer
+
+“If I have around 500 tests, I would not execute them sequentially because execution time would be very high. I would use TestNG parallel execution with a controlled thread count.
+
+I would categorize tests into groups such as smoke and regression and execute them in parallel. I would also make sure the framework is thread-safe, especially the WebDriver management and test data.
+
+I normally use parallel="tests", parallel="classes" or parallel="methods" depending on the framework design, and configure an appropriate thread-count.”
+
+testng.xml
+<suite name="Regression Suite" parallel="tests" thread-count="10">
+
+    <test name="Chrome Tests">
+        <classes>
+            <class name="tests.LoginTest"/>
+            <class name="tests.OrderTest"/>
+        </classes>
+    </test>
+
+    <test name="Firefox Tests">
+        <classes>
+            <class name="tests.PaymentTest"/>
+        </classes>
+    </test>
+
+</suite>
+Important point
+
+Don't simply say:
+
+“I will use 500 threads.”
+
+That's bad practice.
+
+You choose the thread count based on:
+
+Machine resources
+Grid/cloud capacity
+Browser instances
+Application/environment capacity
+Test dependencies
+CI agent capacity
+410. Two tests use same browser. Problem?
+Interview answer
+
+“Yes, it can create problems if both tests share the same WebDriver instance. One test may navigate to another page, close the browser, modify cookies or change the application state while the other test is still executing.
+
+For parallel execution, I create an independent WebDriver instance per test/thread rather than using one static shared driver.”
+
+Bad approach
+public static WebDriver driver;
+
+Multiple parallel tests can interfere with each other.
+
+Better approach — ThreadLocal
+private static ThreadLocal<WebDriver> driver =
+        new ThreadLocal<>();
+
+public static void setDriver(WebDriver webDriver) {
+    driver.set(webDriver);
+}
+
+public static WebDriver getDriver() {
+    return driver.get();
+}
+
+public static void unload() {
+    driver.remove();
+}
+
+Now each thread gets its own driver.
+
+Strong interview statement
+
+“I avoid sharing mutable WebDriver state between parallel tests. I use ThreadLocal or a driver factory that creates one driver per execution thread.”
+
+411. Tests fail because of shared data.
+Example
+
+Test A:
+
+Create customer → ABC
+
+Test B:
+
+Update customer → ABC
+
+When both run simultaneously, they may interfere.
+
+Interview answer
+
+“If tests are failing because of shared test data, I first identify whether the data is static, dynamically generated or environment-dependent. For parallel execution, I prefer creating independent test data for each test using unique identifiers. If required, I can use DataProviders, database setup scripts, APIs or test-data factories to generate isolated data.”
+
+Example
+String email =
+    "test_" + System.currentTimeMillis() + "@gmail.com";
+
+Or:
+
+String username =
+    "user_" + UUID.randomUUID();
+Best practice
+Test
+ ↓
+Generate unique data
+ ↓
+Execute
+ ↓
+Validate
+ ↓
+Cleanup
+Senior-level statement
+
+“I don't solve shared-data problems by simply disabling parallel execution. I first try to make the test data independent.”
+
+412. Tests depend on one another.
+
+Example:
+
+Create Account
+      ↓
+Login
+      ↓
+Place Order
+      ↓
+Payment
+Interview answer
+
+“Ideally, automation tests should be independent because independent tests are easier to execute in parallel and easier to debug. If there is a genuine business dependency, I can use TestNG dependencies, but I avoid creating unnecessary test-to-test dependencies.”
+
+TestNG
+@Test
+public void createAccount() {
+    // create account
+}
+
+@Test(dependsOnMethods = "createAccount")
+public void login() {
+    // login
+}
+
+@Test(dependsOnMethods = "login")
+public void placeOrder() {
+    // order
+}
+Important
+
+If createAccount() fails:
+
+createAccount ❌
+      ↓
+login SKIPPED
+      ↓
+placeOrder SKIPPED
+Better framework approach
+
+Whenever possible:
+
+Test A → independent test data
+Test B → independent test data
+Test C → independent test data
+
+rather than:
+
+A → B → C → D
+413. One test fails and you don't want remaining tests.
+
+This question can mean dependent tests or stop execution after failure.
+
+Option 1 — Dependency
+@Test
+public void login() {
+}
+
+@Test(dependsOnMethods = "login")
+public void checkout() {
+}
+
+If login fails, checkout doesn't execute.
+
+Option 2 — Stop the entire suite
+
+This requires custom listener/runner logic rather than simply depending every test on one test.
+
+Interview answer
+
+“If only specific tests should stop after a failure, I use TestNG dependencies. If the requirement is to terminate the complete execution after the first failure, I implement that at the suite/listener or CI execution level depending on the requirement.”
+
+Don't say:
+
+“I always stop the complete suite when one test fails.”
+
+Because in regression execution, normally we want remaining independent tests to continue.
+
+414. Only smoke tests should run.
+
+Use groups.
+
+Test
+@Test(groups = "smoke")
+public void loginTest() {
+}
+@Test(groups = "regression")
+public void paymentTest() {
+}
+testng.xml
+<groups>
+    <run>
+        <include name="smoke"/>
+    </run>
+</groups>
+
+Now only:
+
+smoke
+smoke
+smoke
+
+tests execute.
+
+Interview answer
+
+“I use TestNG groups to categorize tests such as smoke, regression, sanity, API and UI, and then include the required group from testng.xml or from the Maven/CI command.”
+
+415. Only regression tests should run.
+
+Same concept.
+
+@Test(groups = "regression")
+public void paymentTest() {
+}
+@Test(groups = "regression")
+public void orderTest() {
+}
+XML
+<groups>
+    <run>
+        <include name="regression"/>
+    </run>
+</groups>
+416. Run tests based on groups.
+
+You can assign multiple groups.
+
+@Test(groups = {"smoke", "regression"})
+public void loginTest() {
+}
+
+Another:
+
+@Test(groups = {"regression", "payment"})
+public void paymentTest() {
+}
+
+Then:
+
+<groups>
+    <run>
+        <include name="smoke"/>
+    </run>
+</groups>
+
+or:
+
+<groups>
+    <run>
+        <include name="regression"/>
+    </run>
+</groups>
+Real framework grouping
+
+I commonly use something like:
+
+smoke
+sanity
+regression
+api
+ui
+critical
+Strong answer
+
+“Groups give us flexibility because the same test can belong to multiple execution categories.”
+
+417. Retry only failed tests.
+
+TestNG supports retry using IRetryAnalyzer.
+
+Retry class
+public class RetryAnalyzer
+        implements IRetryAnalyzer {
+
+    private int count = 0;
+    private int maxRetry = 2;
+
+    @Override
+    public boolean retry(ITestResult result) {
+
+        if (count < maxRetry) {
+            count++;
+            return true;
+        }
+
+        return false;
+    }
+}
+
+Then:
+
+@Test(retryAnalyzer = RetryAnalyzer.class)
+public void loginTest() {
+
+}
+Result
+First execution → FAIL
+Retry 1         → FAIL
+Retry 2         → PASS
+Real-time answer
+
+“I use retry selectively for known transient failures such as environment instability or temporary network issues. I don't use retry to hide genuine application defects.”
+
+🔥 This is an important senior-level point.
+
+418. Capture screenshot automatically.
+
+I normally use a TestNG listener.
+
+For example:
+
+public class TestListener
+        implements ITestListener {
+
+    @Override
+    public void onTestFailure(ITestResult result) {
+
+        // capture screenshot
+    }
+}
+
+Screenshot logic:
+
+TakesScreenshot ts =
+        (TakesScreenshot) DriverFactory.getDriver();
+
+File source =
+        ts.getScreenshotAs(OutputType.FILE);
+
+Then save it with the test name.
+
+Why listener?
+
+Without listener:
+
+@Test
+public void loginTest() {
+
+    try {
+        // test
+    } catch (Exception e) {
+
+        screenshot();
+
+        throw e;
+    }
+}
+
+You would have to repeat screenshot logic in every test.
+
+With listener:
+
+Test fails
+    ↓
+ITestListener
+    ↓
+onTestFailure()
+    ↓
+Screenshot
+    ↓
+Log
+    ↓
+Report
+Strong answer
+
+“I prefer listener-based screenshot capture because it is centralized and automatically applies to all tests without duplicating code.”
+
+419. Send report after execution.
+Interview answer
+
+“I integrate the TestNG execution with a reporting mechanism such as Allure, Extent Reports or an HTML report. After execution, the CI pipeline publishes the report as an artifact and can notify the team through email or collaboration tools.”
+
+Typical flow:
+
+TestNG
+   ↓
+Test execution
+   ↓
+Listener
+   ↓
+Logs + screenshots
+   ↓
+Allure / Extent
+   ↓
+HTML report
+   ↓
+Jenkins
+   ↓
+Publish report
+   ↓
+Notification
+Jenkins example concept
+Build
+ ↓
+mvn test
+ ↓
+Generate report
+ ↓
+Publish report
+ ↓
+Email/notification
+Strong answer
+
+“I don't manually send reports from individual tests. Reporting is handled centrally through the framework and CI pipeline.”
+
+420. Run DataProvider in parallel.
+
+This is a very important TestNG question.
+
+Normal DataProvider
+@DataProvider(name = "loginData")
+public Object[][] loginData() {
+
+    return new Object[][] {
+        {"user1", "pass1"},
+        {"user2", "pass2"},
+        {"user3", "pass3"}
+    };
+}
+Parallel DataProvider
+@DataProvider(
+    name = "loginData",
+    parallel = true
+)
+public Object[][] loginData() {
+
+    return new Object[][] {
+        {"user1", "pass1"},
+        {"user2", "pass2"},
+        {"user3", "pass3"}
+    };
+}
+
+Then:
+
+@Test(dataProvider = "loginData")
+public void loginTest(String username,
+                      String password) {
+
+    System.out.println(username);
+}
+
+Execution can become:
+
+Thread 1 → user1
+Thread 2 → user2
+Thread 3 → user3
+Important
+
+You still need a proper:
+
+Thread-safe WebDriver
++
+Independent test data
++
+Appropriate thread count
+
+Otherwise parallel DataProvider can create flaky tests.
+
+421. Run tests across Chrome/Firefox/Edge.
+
+This is basically cross-browser testing + parallel execution.
+
+I would parameterize the browser.
+
+testng.xml
+<suite name="Cross Browser"
+       parallel="tests"
+       thread-count="3">
+
+    <test name="Chrome">
+        <parameter name="browser" value="chrome"/>
+
+        <classes>
+            <class name="tests.LoginTest"/>
+        </classes>
+    </test>
+
+    <test name="Firefox">
+        <parameter name="browser" value="firefox"/>
+
+        <classes>
+            <class name="tests.LoginTest"/>
+        </classes>
+    </test>
+
+    <test name="Edge">
+        <parameter name="browser" value="edge"/>
+
+        <classes>
+            <class name="tests.LoginTest"/>
+        </classes>
+    </test>
+
+</suite>
+TestNG
+@Parameters("browser")
+@BeforeMethod
+public void setup(String browser) {
+
+    if (browser.equalsIgnoreCase("chrome")) {
+        driver = new ChromeDriver();
+    }
+    else if (browser.equalsIgnoreCase("firefox")) {
+        driver = new FirefoxDriver();
+    }
+    else if (browser.equalsIgnoreCase("edge")) {
+        driver = new EdgeDriver();
+    }
+}
+
+Execution:
+
+             LoginTest
+                 |
+       ---------------------
+       |         |         |
+    Chrome    Firefox     Edge
+    Thread1   Thread2    Thread3
+Real company approach
+
+For a larger framework, I wouldn't hard-code browser creation inside the test.
+
+I'd use:
+
+TestNG
+   ↓
+Browser parameter
+   ↓
+DriverFactory
+   ↓
+Chrome / Firefox / Edge
+   ↓
+ThreadLocal<WebDriver>
+
+And for large-scale execution:
+
+TestNG
+   ↓
+Selenium Grid / Cloud
+   ↓
+Chrome
+Firefox
+Edge
+🔥 VERY IMPORTANT: How to answer these as a 5-year SDET
+
+If the interviewer asks:
+
+"How do you execute 500 tests in parallel?"
+
+Don't give only:
+
+"I use parallel=true."
+
+Give this:
+
+“For a large regression suite, I categorize tests using TestNG groups and execute them in parallel with a controlled thread count. I use ThreadLocal WebDriver so each parallel thread gets its own browser instance. I also ensure test data is isolated because shared data can cause race conditions. For cross-browser execution, I parameterize the browser and use a DriverFactory. In CI, depending on the scale, I can distribute the execution across Selenium Grid or a cloud execution platform. After execution, listeners handle screenshots, logging and reporting.”
+
+That answer sounds much more like a real SDET.
+
+🔥 MASTER FLOW TO REMEMBER
+
+These 13 questions are actually connected:
+
+500 Tests
+   ↓
+TestNG Groups
+   ↓
+Smoke / Regression
+   ↓
+Parallel Execution
+   ↓
+Controlled Thread Count
+   ↓
+ThreadLocal WebDriver
+   ↓
+Independent Test Data
+   ↓
+DataProvider Parallel
+   ↓
+Cross Browser
+   ↓
+Retry Failed Tests
+   ↓
+Listener
+   ↓
+Screenshot + Logs
+   ↓
+Allure / Extent Report
+   ↓
+Jenkins
+   ↓
+Notification
+
+If you can explain this complete flow confidently, you can handle a large portion of the TestNG real-time/framework questions in SDET second-round and client interviews.
