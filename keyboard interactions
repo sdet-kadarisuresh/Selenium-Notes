@@ -1,0 +1,735 @@
+SELENIUM MOUSE / KEYBOARD ACTIONS — HANDS-ON
+
+This is a high-value Selenium coding section for SDET interviews. You should be able to write these without looking at notes.
+
+298. What is the Actions class?
+Interview answer
+
+“The Actions class in Selenium is used to perform advanced user interactions such as mouse hover, right click, double click, drag and drop, and keyboard actions.”
+
+Import:
+
+import org.openqa.selenium.interactions.Actions;
+
+Create object:
+
+Actions actions = new Actions(driver);
+
+Then you can perform actions such as:
+
+actions.moveToElement(element).perform();
+🔥 Why do we use Actions?
+
+Normal Selenium:
+
+element.click();
+
+is enough for a normal click.
+
+But for advanced interactions such as:
+
+Mouse Hover
+Right Click
+Double Click
+Drag & Drop
+Keyboard shortcuts
+
+we can use:
+
+Actions
+299. How do you perform Mouse Hover?
+
+Use:
+
+actions.moveToElement(element).perform();
+Example
+
+Suppose you have:
+
+Products
+    ↓
+    Electronics
+    Mobiles
+    Laptops
+
+The submenu appears after hovering over Products.
+
+WebElement products =
+        driver.findElement(By.id("products"));
+
+Actions actions = new Actions(driver);
+
+actions.moveToElement(products).perform();
+
+Then:
+
+driver.findElement(By.id("mobiles")).click();
+⭐ Interview answer
+
+“For mouse hover, I locate the target element and use Actions.moveToElement(element).perform().”
+
+300. How do you perform Right Click?
+
+Right click is called context click in Selenium.
+
+Use:
+
+actions.contextClick(element).perform();
+Example
+WebElement element =
+        driver.findElement(By.id("file"));
+
+Actions actions = new Actions(driver);
+
+actions.contextClick(element).perform();
+
+This performs:
+
+Right Click
+⭐ Important
+
+Don't say:
+
+actions.rightClick();
+
+The Selenium method is:
+
+contextClick()
+301. How do you perform Double Click?
+
+Use:
+
+actions.doubleClick(element).perform();
+
+Example:
+
+WebElement file =
+        driver.findElement(By.id("file"));
+
+Actions actions = new Actions(driver);
+
+actions.doubleClick(file).perform();
+Alternative
+actions.doubleClick().perform();
+
+This double-clicks at the current mouse position.
+
+But normally:
+
+actions.doubleClick(element).perform();
+
+is clearer.
+
+302. How do you perform Drag and Drop?
+
+There are several ways.
+
+Method 1 — dragAndDrop()
+actions.dragAndDrop(source, target).perform();
+
+Example:
+
+WebElement source =
+        driver.findElement(By.id("source"));
+
+WebElement target =
+        driver.findElement(By.id("target"));
+
+Actions actions = new Actions(driver);
+
+actions.dragAndDrop(source, target).perform();
+🔥 Method 2 — Click, Hold, Move, Release
+
+Sometimes dragAndDrop() doesn't work properly with certain JavaScript-heavy applications.
+
+Then use:
+
+actions.clickAndHold(source)
+       .moveToElement(target)
+       .release()
+       .perform();
+Complete:
+WebElement source =
+        driver.findElement(By.id("source"));
+
+WebElement target =
+        driver.findElement(By.id("target"));
+
+Actions actions = new Actions(driver);
+
+actions.clickAndHold(source)
+       .moveToElement(target)
+       .release()
+       .perform();
+⭐ Strong Interview Answer
+
+If interviewer asks:
+
+“Drag and drop is not working using dragAndDrop(). What will you do?”
+
+Say:
+
+“I would first verify the source and target locators and whether the target is visible and interactable. If the normal dragAndDrop() action doesn't work because of the application's implementation, I can perform the interaction manually using clickAndHold(), moveToElement(), and release().”
+
+Then write:
+
+actions.clickAndHold(source)
+       .moveToElement(target)
+       .release()
+       .perform();
+303. How do you perform Keyboard Actions?
+
+The Actions class can also simulate keyboard operations.
+
+Examples:
+
+actions.sendKeys(Keys.ENTER).perform();
+actions.sendKeys(Keys.TAB).perform();
+actions.sendKeys(Keys.ESCAPE).perform();
+
+Import:
+
+import org.openqa.selenium.Keys;
+🔥 Example — Press ENTER
+Actions actions = new Actions(driver);
+
+actions.sendKeys(Keys.ENTER).perform();
+🔥 Example — Press TAB
+actions.sendKeys(Keys.TAB).perform();
+🔥 Example — Escape
+actions.sendKeys(Keys.ESCAPE).perform();
+304. How do you perform CTRL+A?
+
+Use:
+
+actions.keyDown(Keys.CONTROL)
+       .sendKeys("a")
+       .keyUp(Keys.CONTROL)
+       .perform();
+Example
+WebElement textbox =
+        driver.findElement(By.id("username"));
+
+textbox.click();
+
+Actions actions = new Actions(driver);
+
+actions.keyDown(Keys.CONTROL)
+       .sendKeys("a")
+       .keyUp(Keys.CONTROL)
+       .perform();
+
+This performs:
+
+CTRL + A
+🔥 Simpler Approach
+
+You can also send the key combination directly to an element:
+
+textbox.sendKeys(Keys.CONTROL, "a");
+
+Example:
+
+WebElement textbox =
+        driver.findElement(By.id("username"));
+
+textbox.sendKeys(Keys.CONTROL, "a");
+Interview tip
+
+Know both approaches.
+
+WebElement.sendKeys()
+
+Good for element-specific keyboard input:
+
+textbox.sendKeys(Keys.CONTROL, "a");
+Actions
+
+Good for more complex keyboard/mouse sequences:
+
+actions.keyDown(Keys.CONTROL)
+       .sendKeys("a")
+       .keyUp(Keys.CONTROL)
+       .perform();
+305. How do you perform CTRL+C?
+
+Use:
+
+actions.keyDown(Keys.CONTROL)
+       .sendKeys("c")
+       .keyUp(Keys.CONTROL)
+       .perform();
+
+Complete example:
+
+WebElement textbox =
+        driver.findElement(By.id("username"));
+
+textbox.click();
+
+Actions actions = new Actions(driver);
+
+actions.keyDown(Keys.CONTROL)
+       .sendKeys("c")
+       .keyUp(Keys.CONTROL)
+       .perform();
+
+This performs:
+
+CTRL + C
+306. How do you perform CTRL+V?
+
+Use:
+
+actions.keyDown(Keys.CONTROL)
+       .sendKeys("v")
+       .keyUp(Keys.CONTROL)
+       .perform();
+
+Example:
+
+WebElement textbox =
+        driver.findElement(By.id("username"));
+
+textbox.click();
+
+Actions actions = new Actions(driver);
+
+actions.keyDown(Keys.CONTROL)
+       .sendKeys("v")
+       .keyUp(Keys.CONTROL)
+       .perform();
+🔥 CTRL+A → CTRL+C → CTRL+V
+
+You should know this practical sequence.
+
+Actions actions = new Actions(driver);
+
+actions.keyDown(Keys.CONTROL)
+       .sendKeys("a")
+       .keyUp(Keys.CONTROL)
+       .perform();
+
+actions.keyDown(Keys.CONTROL)
+       .sendKeys("c")
+       .keyUp(Keys.CONTROL)
+       .perform();
+
+actions.keyDown(Keys.CONTROL)
+       .sendKeys("v")
+       .keyUp(Keys.CONTROL)
+       .perform();
+⭐ Windows/Linux vs Mac
+
+On Windows/Linux:
+
+Keys.CONTROL
+
+On macOS, keyboard shortcuts commonly use:
+
+Keys.COMMAND
+
+For your typical Selenium interview environment, Windows + Keys.CONTROL is what you'll most commonly demonstrate.
+
+307. How do you scroll in Selenium?
+
+There are multiple approaches.
+
+The modern Selenium approach is often to use JavaScript or Selenium's scrolling capabilities depending on the requirement.
+
+Using JavaScript:
+
+JavascriptExecutor js =
+        (JavascriptExecutor) driver;
+
+js.executeScript("window.scrollBy(0,500)");
+
+This scrolls vertically by 500 pixels.
+
+308. What is JavascriptExecutor?
+Interview answer
+
+“JavascriptExecutor is a Selenium interface that allows us to execute JavaScript code in the browser. I use it when a browser interaction or scrolling operation is easier to perform through JavaScript.”
+
+Import:
+
+import org.openqa.selenium.JavascriptExecutor;
+
+Create:
+
+JavascriptExecutor js =
+        (JavascriptExecutor) driver;
+
+Execute:
+
+js.executeScript("window.scrollBy(0,500)");
+🔥 Why cast WebDriver to JavascriptExecutor?
+
+Because:
+
+JavascriptExecutor
+
+is an interface, and the WebDriver implementation also supports that interface.
+
+So:
+
+JavascriptExecutor js =
+        (JavascriptExecutor) driver;
+
+gives us access to:
+
+executeScript()
+309. How do you Scroll to an Element?
+
+This is a very common interview coding question.
+
+Use:
+
+js.executeScript(
+    "arguments[0].scrollIntoView(true);",
+    element
+);
+Example
+WebElement element =
+        driver.findElement(By.id("footer"));
+
+JavascriptExecutor js =
+        (JavascriptExecutor) driver;
+
+js.executeScript(
+    "arguments[0].scrollIntoView(true);",
+    element
+);
+
+Now the element is brought into the viewport.
+
+🔥 What is arguments[0]?
+
+This is worth knowing.
+
+In:
+
+js.executeScript(
+    "arguments[0].scrollIntoView(true);",
+    element
+);
+
+the JavaScript:
+
+arguments[0]
+
+refers to the first argument passed to executeScript().
+
+Here:
+
+element
+
+is that first argument.
+
+So:
+
+arguments[0] → element
+310. How do you Scroll to Bottom?
+
+Use:
+
+js.executeScript(
+    "window.scrollTo(0, document.body.scrollHeight);"
+);
+Complete:
+JavascriptExecutor js =
+        (JavascriptExecutor) driver;
+
+js.executeScript(
+    "window.scrollTo(0, document.body.scrollHeight);"
+);
+
+This moves the page to the bottom.
+
+🔥 Scroll to Top
+
+The interviewer may immediately ask this.
+
+js.executeScript(
+    "window.scrollTo(0, 0);"
+);
+🔥 Scroll Down by Pixels
+js.executeScript(
+    "window.scrollBy(0,500);"
+);
+
+Scroll up:
+
+js.executeScript(
+    "window.scrollBy(0,-500);"
+);
+
+Remember:
+
+Positive Y → down
+Negative Y → up
+311. How do you perform Horizontal Scrolling?
+
+This is another useful coding question.
+
+JavaScript:
+
+js.executeScript(
+    "window.scrollBy(500,0);"
+);
+
+Here:
+
+X = 500
+Y = 0
+
+So the page moves horizontally.
+
+🔥 Horizontal Scroll to a Specific Element
+
+You can also use:
+
+js.executeScript(
+    "arguments[0].scrollIntoView(true);",
+    element
+);
+
+But if you specifically need horizontal movement, you can use JavaScript such as:
+
+js.executeScript(
+    "arguments[0].scrollLeft = arguments[0].scrollWidth;",
+    element
+);
+
+This is particularly useful when the scrollable container itself has horizontal overflow.
+
+🔥 Real-Time Horizontal Table Scenario
+
+Suppose your application has:
+
+Employee Table
+-------------------------------------------------------------→
+Name | ID | Dept | Location | Salary | Bonus | Manager | ...
+
+The table has a horizontal scrollbar.
+
+You locate the scrollable container:
+
+WebElement table =
+        driver.findElement(By.id("tableContainer"));
+
+Then:
+
+JavascriptExecutor js =
+        (JavascriptExecutor) driver;
+
+js.executeScript(
+    "arguments[0].scrollLeft = arguments[0].scrollWidth;",
+    table
+);
+
+This moves the container horizontally toward the right.
+
+🔥 Selenium Actions Scrolling
+
+Modern Selenium also provides wheel actions.
+
+For example:
+
+Actions actions = new Actions(driver);
+
+actions.scrollByAmount(0, 500).perform();
+
+Scroll down:
+
+actions.scrollByAmount(0, 500).perform();
+
+Scroll up:
+
+actions.scrollByAmount(0, -500).perform();
+🔥 Scroll to Element Using Actions
+
+You can also use:
+
+actions.scrollToElement(element).perform();
+
+Example:
+
+WebElement element =
+        driver.findElement(By.id("footer"));
+
+Actions actions = new Actions(driver);
+
+actions.scrollToElement(element).perform();
+Interview advantage
+
+If interviewer asks:
+
+"Do you know any way other than JavaScript for scrolling?"
+
+You can say:
+
+“Yes. Selenium's Actions API provides wheel scrolling methods such as scrollByAmount() and scrollToElement().”
+
+🔥 Actions vs JavascriptExecutor
+
+This is a very good interview comparison.
+
+Requirement	Approach
+Normal click	element.click()
+Mouse hover	Actions
+Right click	Actions.contextClick()
+Double click	Actions.doubleClick()
+Drag & drop	Actions
+Keyboard combinations	Actions
+Scroll by wheel	Actions
+Scroll to element	Actions.scrollToElement()
+Execute browser JavaScript	JavascriptExecutor
+Scroll using JS	JavascriptExecutor
+🔥 Interview Question: "Why don't you always use JavaScript click?"
+
+This is a 5-year-level interview question.
+
+Don't say:
+
+"JavaScript click is better."
+
+Instead:
+
+“I prefer the normal Selenium interaction first because it represents a real user interaction and also allows Selenium to perform its normal interactability checks. I use JavaScript when there is a genuine requirement, such as interacting with a specific DOM property or handling a case where standard Selenium interaction is not suitable after investigating the root cause.”
+
+That's much stronger.
+
+🔥 Complete Mouse Actions Example
+WebElement menu =
+        driver.findElement(By.id("menu"));
+
+WebElement source =
+        driver.findElement(By.id("source"));
+
+WebElement target =
+        driver.findElement(By.id("target"));
+
+Actions actions = new Actions(driver);
+
+// Mouse hover
+actions.moveToElement(menu).perform();
+
+// Right click
+actions.contextClick(menu).perform();
+
+// Double click
+actions.doubleClick(menu).perform();
+
+// Drag and drop
+actions.dragAndDrop(source, target).perform();
+🔥 Complete Keyboard Example
+WebElement textbox =
+        driver.findElement(By.id("username"));
+
+Actions actions = new Actions(driver);
+
+textbox.click();
+
+// CTRL + A
+actions.keyDown(Keys.CONTROL)
+       .sendKeys("a")
+       .keyUp(Keys.CONTROL)
+       .perform();
+
+// CTRL + C
+actions.keyDown(Keys.CONTROL)
+       .sendKeys("c")
+       .keyUp(Keys.CONTROL)
+       .perform();
+
+// CTRL + V
+actions.keyDown(Keys.CONTROL)
+       .sendKeys("v")
+       .keyUp(Keys.CONTROL)
+       .perform();
+🔥 Complete Scrolling Example
+JavascriptExecutor js =
+        (JavascriptExecutor) driver;
+
+// Scroll down
+js.executeScript("window.scrollBy(0,500)");
+
+// Scroll to bottom
+js.executeScript(
+        "window.scrollTo(0, document.body.scrollHeight)"
+);
+
+// Scroll to top
+js.executeScript(
+        "window.scrollTo(0,0)"
+);
+
+// Scroll to element
+WebElement element =
+        driver.findElement(By.id("footer"));
+
+js.executeScript(
+        "arguments[0].scrollIntoView(true)",
+        element
+);
+🎯 298–311 INTERVIEW CHEAT SHEET
+#	Question	Code
+298	Actions class	new Actions(driver)
+299	Mouse hover	moveToElement(element).perform()
+300	Right click	contextClick(element).perform()
+301	Double click	doubleClick(element).perform()
+302	Drag/drop	dragAndDrop(source,target).perform()
+303	Keyboard	sendKeys(Keys.ENTER).perform()
+304	CTRL+A	keyDown(CONTROL).sendKeys("a").keyUp(CONTROL)
+305	CTRL+C	keyDown(CONTROL).sendKeys("c").keyUp(CONTROL)
+306	CTRL+V	keyDown(CONTROL).sendKeys("v").keyUp(CONTROL)
+307	Scroll	scrollByAmount() / JavaScript
+308	JavascriptExecutor	Execute JavaScript in browser
+309	Scroll to element	scrollToElement() / scrollIntoView()
+310	Scroll bottom	window.scrollTo(0, document.body.scrollHeight)
+311	Horizontal	scrollBy(500,0) / scrollLeft
+⭐ MUST-MEMORIZE CODING SET
+
+If you're short on interview-prep time, write these from memory:
+
+Mouse hover
+Actions actions = new Actions(driver);
+
+actions.moveToElement(element).perform();
+Right click
+actions.contextClick(element).perform();
+Double click
+actions.doubleClick(element).perform();
+Drag & drop
+actions.dragAndDrop(source, target).perform();
+Drag & drop fallback
+actions.clickAndHold(source)
+       .moveToElement(target)
+       .release()
+       .perform();
+CTRL+A
+actions.keyDown(Keys.CONTROL)
+       .sendKeys("a")
+       .keyUp(Keys.CONTROL)
+       .perform();
+Scroll to element
+JavascriptExecutor js =
+        (JavascriptExecutor) driver;
+
+js.executeScript(
+        "arguments[0].scrollIntoView(true);",
+        element);
+Scroll bottom
+js.executeScript(
+        "window.scrollTo(0, document.body.scrollHeight);");
+Horizontal scroll
+js.executeScript(
+        "window.scrollBy(500,0);");
+Selenium wheel scroll
+actions.scrollByAmount(0, 500).perform();
+Scroll directly to element
+actions.scrollToElement(element).perform();
+⭐ The answer to memorize for a broad interview question
+
+“For advanced mouse and keyboard interactions, I use Selenium's Actions class. It supports mouse hover, context click, double click, drag-and-drop and keyboard combinations. For scrolling, I can use Selenium's wheel actions such as scrollByAmount() or scrollToElement(), and I can also use JavascriptExecutor when JavaScript-based scrolling is appropriate. I don't use JavaScript as the first choice for normal user interactions; I first use standard Selenium APIs and investigate the actual reason if an interaction fails.”
