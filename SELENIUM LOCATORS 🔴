@@ -1,0 +1,864 @@
+SELENIUM LOCATORS 🔴
+What are locators?
+Types of locators?
+ID vs XPath?
+CSS vs XPath?
+Which locator do you prefer?
+Absolute XPath?
+Relative XPath?
+Dynamic XPath?
+contains()?
+starts-with()?
+text()?
+normalize-space()?
+XPath AND?
+XPath OR?
+Parent XPath?
+Child XPath?
+Ancestor?
+Descendant?
+Following?
+Following-sibling?
+Preceding?
+Preceding-sibling?
+XPath with two attributes?
+XPath for dynamic ID?
+XPath for Gmail/login link?
+XPath for table row?
+XPath for specific column?
+CSS selectors?
+CSS ID?
+CSS class?
+CSS attribute?
+CSS starts-with?
+CSS contains?
+
+207. What are locators?
+Simple meaning
+
+A locator is a mechanism used by Selenium to identify a particular web element on a webpage.
+
+For example, if we want to click a Login button, Selenium first needs to locate that button.
+
+Common example
+driver.findElement(By.id("loginBtn")).click();
+
+Here:
+
+findElement() → searches for the element
+By.id() → locator strategy
+"loginBtn" → locator value
+Interview answer
+
+“Locators are used in Selenium to identify and locate web elements on a webpage so that we can perform actions like click, enter text, select, or retrieve values.”
+
+208. What are the types of locators?
+
+Selenium provides 8 traditional locator strategies:
+
+ID
+Name
+Class Name
+Tag Name
+Link Text
+Partial Link Text
+CSS Selector
+XPath
+Example
+By.id("username");
+
+By.name("email");
+
+By.className("login-btn");
+
+By.tagName("input");
+
+By.linkText("Login");
+
+By.partialLinkText("Log");
+
+By.cssSelector("#username");
+
+By.xpath("//input[@id='username']");
+Interview answer
+
+“The main Selenium locator strategies are ID, Name, Class Name, Tag Name, Link Text, Partial Link Text, CSS Selector and XPath.”
+
+⭐ Important
+
+In real projects, you will mostly use:
+
+ID → CSS → XPath
+
+depending on the application's HTML.
+
+209. ID vs XPath?
+ID	XPath
+Usually faster/simple	More powerful
+Easy to read	Can be complex
+Requires unique ID	Can work without ID
+Best when stable	Useful for dynamic elements
+By.id()	By.xpath()
+Example
+
+HTML:
+
+<input id="username" name="user">
+
+ID:
+
+driver.findElement(By.id("username"));
+
+XPath:
+
+driver.findElement(By.xpath("//input[@id='username']"));
+Interview answer
+
+“If a stable and unique ID is available, I prefer ID because it is simple and maintainable. I use XPath when the element doesn't have a reliable ID or when I need relationships, text matching, or dynamic element handling.”
+
+210. CSS vs XPath?
+CSS
+driver.findElement(By.cssSelector("#username"));
+XPath
+driver.findElement(By.xpath("//input[@id='username']"));
+Major difference
+
+XPath can navigate relationships such as:
+
+parent
+child
+ancestor
+descendant
+following
+preceding
+sibling
+
+CSS cannot provide the same XPath-style DOM traversal.
+
+Interview answer
+
+“CSS selectors are generally concise and easy to maintain, while XPath provides more flexibility, especially for complex DOM relationships, text-based identification and dynamic elements. I use whichever gives me a stable and maintainable locator.”
+
+211. Which locator do you prefer?
+
+Don't say:
+
+“I always use XPath.”
+
+That's not a good senior-level answer.
+
+Better answer
+
+“My preference is to use the most stable and unique locator available. First I look for a reliable ID or application-specific attribute such as data-testid. If those are not available, I use CSS or XPath depending on the DOM structure. For dynamic elements or elements requiring relationships or text matching, XPath is often useful.”
+
+Locator priority
+
+A practical approach:
+
+Stable ID / data-testid
+       ↓
+CSS
+       ↓
+XPath
+       ↓
+Other locators
+212. What is Absolute XPath?
+
+Absolute XPath starts from the root of the HTML document.
+
+Example:
+
+/html/body/div/div/form/input
+
+It represents the complete path from the root.
+
+Problem
+
+If one <div> is added to the page:
+
+/html/body/div/div/form/input
+
+may become:
+
+/html/body/div/div/div/form/input
+
+and your locator can break.
+
+Interview answer
+
+“Absolute XPath starts from the root node and specifies the complete path to an element. I generally avoid it because it is tightly coupled to the DOM structure and is fragile when the UI changes.”
+
+213. What is Relative XPath?
+
+Relative XPath starts from anywhere in the DOM using //.
+
+Example:
+
+//input[@id='username']
+
+Instead of:
+
+/html/body/div/form/input
+Interview answer
+
+“Relative XPath starts with // and identifies an element based on its attributes, text, or DOM relationships rather than specifying the complete path from the root. It is more maintainable than absolute XPath.”
+
+214. What is Dynamic XPath?
+
+Dynamic XPath is an XPath designed to locate elements whose attributes or other properties may change dynamically.
+
+Suppose:
+
+<input id="user_12345">
+
+Tomorrow:
+
+<input id="user_67890">
+
+The ID changes.
+
+Instead of:
+
+//input[@id='user_12345']
+
+we can use:
+
+//input[contains(@id,'user_')]
+Interview answer
+
+“Dynamic XPath is used when element attributes such as ID or class values are generated dynamically. Instead of depending on the complete changing value, I identify the stable portion using functions like contains(), starts-with(), or other stable attributes.”
+
+215. What is contains() in XPath?
+
+contains() checks whether an attribute or text contains a particular value.
+
+Syntax
+//tag[contains(@attribute,'value')]
+Example
+
+HTML:
+
+<input id="user_12345">
+
+XPath:
+
+//input[contains(@id,'user_')]
+Text example
+//button[contains(text(),'Login')]
+Interview answer
+
+“I use contains() when only a part of an attribute value or text is stable. It is particularly useful for dynamic IDs or partially changing values.”
+
+216. What is starts-with()?
+
+It checks whether an attribute value starts with a particular value.
+
+HTML:
+
+<input id="user_12345">
+
+XPath:
+
+//input[starts-with(@id,'user_')]
+Difference
+
+contains():
+
+//input[contains(@id,'user')]
+
+Means:
+
+user can appear anywhere.
+
+starts-with():
+
+//input[starts-with(@id,'user')]
+
+Means:
+
+ID must start with user.
+
+Interview answer
+
+“starts-with() is useful when the beginning portion of a dynamic attribute remains constant.”
+
+217. What is text()?
+
+text() is used to identify elements based on their visible text.
+
+HTML:
+
+<button>Login</button>
+
+XPath:
+
+//button[text()='Login']
+Example
+driver.findElement(
+    By.xpath("//button[text()='Login']")
+).click();
+Interview answer
+
+“text() is an XPath function used to locate an element based on its text content.”
+
+218. What is normalize-space()?
+
+This is a very useful interview question.
+
+It removes unnecessary leading/trailing spaces and normalizes multiple spaces.
+
+Suppose:
+
+<button>
+    Login
+</button>
+
+You can use:
+
+//button[normalize-space()='Login']
+Another example
+//button[normalize-space(text())='Login']
+Why useful?
+
+Sometimes UI text contains:
+
+"   Login   "
+
+instead of:
+
+"Login"
+Interview answer
+
+“normalize-space() removes leading and trailing whitespace and normalizes consecutive whitespace characters. I use it when the UI contains inconsistent spaces and I need a reliable text-based XPath.”
+
+219. XPath AND
+
+and means both conditions must be true.
+
+HTML:
+
+<input id="username" name="email">
+
+XPath:
+
+//input[@id='username' and @name='email']
+
+Both must match.
+
+Java
+driver.findElement(
+    By.xpath("//input[@id='username' and @name='email']")
+);
+Interview answer
+
+“I use and when multiple conditions must be satisfied for the same element.”
+
+220. XPath OR
+
+or means at least one condition must be true.
+
+//input[@id='username' or @name='email']
+Difference
+[@id='username' and @name='email']
+
+Both required.
+
+[@id='username' or @name='email']
+
+Either can match.
+
+221. What is Parent XPath?
+
+Parent XPath moves from an element to its immediate parent.
+
+Example:
+
+<div>
+    <input id="username">
+</div>
+
+From input:
+
+//input[@id='username']/parent::div
+
+Or:
+
+//input[@id='username']/..
+Interview answer
+
+“The parent axis is used to locate the immediate parent of an element.”
+
+222. What is Child XPath?
+
+Child XPath identifies elements directly under the current element.
+
+Example:
+
+<div>
+    <input>
+</div>
+//div/child::input
+
+Or:
+
+//div/input
+Important
+
+/ generally represents a direct child relationship.
+
+223. What is Ancestor?
+
+An ancestor is any parent, grandparent, great-grandparent, etc.
+
+Example:
+
+html
+ └── body
+      └── div
+           └── form
+                └── input
+
+For the input:
+
+//input/ancestor::form
+
+Or:
+
+//input/ancestor::div
+Interview answer
+
+“The ancestor axis allows us to move upward through the DOM and locate any parent-level element, not just the immediate parent.”
+
+224. What is Descendant?
+
+Descendant means an element located anywhere below the current element.
+
+Example:
+
+//div[@id='login']/descendant::input
+
+This can find inputs inside the div at any nested level.
+
+Difference
+
+Child:
+
+//div/input
+
+Only direct child.
+
+Descendant:
+
+//div/descendant::input
+
+Can be nested deeper.
+
+225. What is Following?
+
+following identifies nodes that appear after the current element anywhere in the document.
+
+Example:
+
+//input[@id='username']/following::button
+
+This can find a button appearing later in the DOM.
+
+Interview answer
+
+“The following axis selects elements that occur after the current node in document order, excluding descendants.”
+
+226. What is Following-Sibling?
+
+This is extremely common in real automation.
+
+Suppose:
+
+<div>
+    <label>Username</label>
+    <input id="username">
+</div>
+
+From label:
+
+//label[text()='Username']/following-sibling::input
+Difference
+
+following:
+
+following::
+
+Can search anywhere after the element.
+
+following-sibling:
+
+following-sibling::
+
+Searches elements sharing the same parent.
+
+Interview answer
+
+“following-sibling is used when the required element is a sibling of the current element and appears after it under the same parent.”
+
+227. What is Preceding?
+
+preceding finds elements appearing before the current element in document order.
+
+Example:
+
+//input[@id='username']/preceding::label
+228. What is Preceding-Sibling?
+
+Finds a sibling that appears before the current element.
+
+HTML:
+
+<div>
+    <label>Username</label>
+    <input id="username">
+</div>
+
+From input:
+
+//input[@id='username']/preceding-sibling::label
+Easy memory trick
+following        → anywhere after
+following-sibling → same parent + after
+
+preceding        → anywhere before
+preceding-sibling → same parent + before
+229. XPath with two attributes
+
+Suppose:
+
+<input id="username" name="email" type="text">
+
+You can use:
+
+//input[@id='username' and @name='email']
+Another example
+//input[@name='email' and @type='text']
+Interview answer
+
+“When one attribute is not sufficiently unique, I combine multiple stable attributes using the and operator.”
+
+230. XPath for dynamic ID
+
+Suppose the application generates:
+
+<input id="user_12345">
+
+and later:
+
+<input id="user_67890">
+
+Use:
+
+//input[contains(@id,'user_')]
+
+Or if the beginning is stable:
+
+//input[starts-with(@id,'user_')]
+Better real-world approach
+
+Don't automatically use contains().
+
+First check whether there is a stable attribute:
+
+<input
+    id="user_12345"
+    data-testid="username">
+
+Then:
+
+//*[@data-testid='username']
+
+is better.
+
+⭐ Senior answer
+
+“For dynamic IDs, I first look for a stable application-specific attribute such as data-testid. If that's not available, I use the stable portion of the dynamic ID with contains() or starts-with().”
+
+231. XPath for Gmail/Login link
+
+Suppose the page contains:
+
+<a href="/login">Login</a>
+By exact text
+//a[text()='Login']
+By href
+//a[@href='/login']
+By partial text
+//a[contains(text(),'Login')]
+More robust
+//a[normalize-space()='Login']
+Interview answer
+
+“For a login link, I would first inspect the DOM and prefer a stable unique attribute. If the link has reliable text, I can use //a[normalize-space()='Login']; if the href is stable, I can use the href attribute.”
+
+⭐ Important
+
+Don't blindly give:
+
+//a[text()='Login']
+
+in an interview.
+
+Explain how you choose the locator based on stability and uniqueness.
+
+232. XPath for table row
+
+Suppose:
+
+<table>
+  <tr>
+    <td>101</td>
+    <td>John</td>
+    <td>Active</td>
+  </tr>
+
+  <tr>
+    <td>102</td>
+    <td>David</td>
+    <td>Inactive</td>
+  </tr>
+</table>
+
+Find the row containing David:
+
+//tr[td[text()='David']]
+
+Or:
+
+//tr[td[normalize-space()='David']]
+Selenium
+WebElement row = driver.findElement(
+    By.xpath("//tr[td[normalize-space()='David']]")
+);
+⭐ Very important real-world pattern
+//tr[td[normalize-space()='David']]
+
+means:
+
+Find the tr where one of its td elements contains David.
+
+233. XPath for specific column
+
+Suppose:
+
+ID	Name	Status
+101	John	Active
+102	David	Inactive
+Find David's Status
+//tr[td[normalize-space()='David']]/td[3]
+
+This means:
+
+Find row containing David
+        ↓
+Go to third td
+        ↓
+Status
+If you want the text
+String status = driver.findElement(
+    By.xpath("//tr[td[normalize-space()='David']]/td[3]")
+).getText();
+
+System.out.println(status);
+⭐ Better dynamic table approach
+
+If column position can change, don't hardcode [3].
+
+You can identify the column from the header and then use the appropriate position dynamically.
+
+That's a common 5-year SDET/client-round discussion.
+
+234. What are CSS selectors?
+
+CSS selectors are patterns used to identify HTML elements using CSS-style syntax.
+
+Example:
+
+#username
+
+or:
+
+input[name='email']
+
+Selenium:
+
+driver.findElement(
+    By.cssSelector("input[name='email']")
+);
+Common CSS selectors
+#id
+.class
+tag
+tag#id
+tag.class
+[attribute='value']
+235. CSS ID selector
+
+For:
+
+<input id="username">
+
+CSS:
+
+#username
+
+Selenium:
+
+driver.findElement(By.cssSelector("#username"));
+Interview answer
+
+“In CSS, # is used to identify an element by its ID.”
+
+236. CSS Class selector
+
+For:
+
+<button class="login-btn">
+
+CSS:
+
+.login-btn
+
+Selenium:
+
+driver.findElement(
+    By.cssSelector(".login-btn")
+);
+Multiple classes
+<button class="btn primary login">
+
+You can use:
+
+.btn.primary.login
+
+No spaces.
+
+Important
+.btn .primary
+
+means something different — .primary is a descendant.
+
+237. CSS Attribute selector
+
+HTML:
+
+<input type="text" name="username">
+
+CSS:
+
+input[name='username']
+
+Selenium:
+
+driver.findElement(
+    By.cssSelector("input[name='username']")
+);
+Multiple attributes
+input[type='text'][name='username']
+238. CSS starts-with
+
+CSS uses:
+
+^=
+Example
+<input id="user_12345">
+
+CSS:
+
+input[id^='user_']
+
+Meaning:
+
+ID starts with user_.
+
+Selenium
+driver.findElement(
+    By.cssSelector("input[id^='user_']")
+);
+Remember
+^=  → starts with
+$=  → ends with
+*=  → contains
+239. CSS contains
+
+CSS uses:
+
+*=
+
+Example:
+
+<input id="user_12345">
+input[id*='user_']
+
+Meaning:
+
+ID contains user_.
+
+CSS ends-with
+
+Also remember:
+
+input[id$='12345']
+
+means:
+
+ID ends with 12345.
+
+🔥 MUST-MEMORIZE LOCATOR CHEAT SHEET
+
+For your Infosys/SDET interviews, memorize this:
+
+Requirement	XPath / CSS
+ID	//*[@id='username']
+Two attributes	//input[@id='user' and @name='email']
+Contains	//input[contains(@id,'user')]
+Starts with XPath	//input[starts-with(@id,'user')]
+Exact text	//button[text()='Login']
+Trimmed text	//button[normalize-space()='Login']
+OR	//input[@id='user' or @name='email']
+Parent	//input/parent::div
+Child	//div/child::input
+Ancestor	//input/ancestor::form
+Descendant	//div/descendant::input
+Following	//input/following::button
+Following sibling	//label/following-sibling::input
+Preceding	//input/preceding::label
+Preceding sibling	//input/preceding-sibling::label
+Table row	//tr[td[normalize-space()='David']]
+Table column	//tr[td[normalize-space()='David']]/td[3]
+CSS ID	#username
+CSS class	.login-btn
+CSS attribute	input[name='email']
+CSS starts with	input[id^='user_']
+CSS contains	input[id*='user_']
+CSS ends with	input[id$='12345']
+⭐ One question you are VERY likely to get
+
+Interviewer:
+
+“How do you handle a dynamic XPath?”
+
+Strong answer:
+
+“First I inspect the DOM and identify which attributes are stable. I prefer a unique and application-specific attribute such as data-testid if available. If the ID or another attribute is dynamic, I identify the stable portion using XPath functions such as contains() or starts-with(). I also avoid absolute XPath because it is tightly coupled to the DOM structure. My goal is always to create a unique, stable and maintainable locator.”
+
+That answer sounds much stronger than simply saying “I use contains.”
+
+⭐ Another client-round question
+
+Interviewer:
+
+“Your XPath was working yesterday, but today it is failing. What will you do?”
+
+Answer:
+
+“I would first inspect the current DOM and compare it with the previous locator assumptions. I would check whether the element's ID, class, text, hierarchy, iframe, shadow DOM, or page state has changed. I would also check the failure screenshot and logs. If the locator is unstable, I would update it using a more stable attribute or relationship rather than simply adding waits or making the XPath more complex.”
+
+This is the real SDET mindset: don't just make the locator pass; make it stable and maintainable.
+
+
+
